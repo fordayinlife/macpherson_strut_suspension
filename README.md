@@ -1,6 +1,6 @@
 # MacPherson Strut Suspension — Engineering Diagram & Physics Simulator
 
-A single-file, zero-dependency interactive automotive engineering cutaway diagram and real-time half-car physics simulator (`macpherson_suspension_sim.html`). Designed for students, mechanics, and vehicle dynamics enthusiasts, it visualizes how front MacPherson strut suspension components articulate, deform, and transfer loads across bumps, potholes, cornering maneuvers, and component failures.
+A single-file, zero-dependency interactive automotive engineering cutaway diagram and real-time half-car physics simulator (`macpherson_strut_suspension_diagram_physics_simulator.html`). Designed for students, mechanics, and vehicle dynamics enthusiasts, it visualizes how front MacPherson strut suspension components articulate, deform, and transfer loads across bumps, potholes, cornering maneuvers, and component failures.
 
 ---
 
@@ -29,8 +29,8 @@ A single-file, zero-dependency interactive automotive engineering cutaway diagra
 
 ## Quick Start & Usage
 
-1. Download or save `macpherson_suspension_sim.html` locally.
-2. Open `macpherson_suspension_sim.html` directly in any modern desktop or mobile web browser (Chrome, Edge, Firefox, or Safari).
+1. Download or save `macpherson_strut_suspension_diagram_physics_simulator.html` locally.
+2. Open `macpherson_strut_suspension_diagram_physics_simulator.html` directly in any modern desktop or mobile web browser (Chrome, Edge, Firefox, or Safari).
 3. **No installation, build step, server, or internet connection is required**—all styling, physics, and High-DPI canvas rendering are self-contained inside the single HTML file.
 
 ---
@@ -68,6 +68,6 @@ K_{\text{tire}} &= 215,000\text{ N/m} && \text{(Vertical tire carcass stiffness)
 ## Project Structure
 
 ```text
-├── macpherson_suspension_sim.html   # Complete self-contained application (HTML + CSS + Canvas Physics Engine)
+├── macpherson_strut_suspension_diagram_physics_simulator.html   # Complete self-contained application (HTML + CSS + Canvas Physics Engine)
 └── README.md                        # Project overview, physics specification, and user guide
 ```
