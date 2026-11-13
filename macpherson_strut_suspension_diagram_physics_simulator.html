@@ -1,0 +1,3183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MacPherson Strut Suspension — Engineering Diagram &amp; Physics Simulator</title>
+  <style>
+    /* ==========================================================================
+       ZERO-DEPENDENCY DARK TECHNICAL BLUEPRINT & CAD UI STYLES
+       ========================================================================== */
+    :root {
+      --bg-app: #070b12;
+      --bg-panel: #0e1522;
+      --bg-card: #141e30;
+      --bg-card-hover: #1b2840;
+      --bg-canvas: #0d1117;
+      --border-subtle: #21304a;
+      --border-strong: #334a70;
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #38bdf8;
+      --accent-emerald: #34d399;
+      --accent-amber: #fbbf24;
+      --accent-rose: #f43f5e;
+      --accent-purple: #a78bfa;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-app);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.45;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation & Scenario Header */
+    .topbar {
+      background: rgba(14, 21, 34, 0.96);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      padding: 10px 16px;
+    }
+
+    .topbar-inner {
+      max-width: 1620px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+    }
+
+    .badge-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(56, 189, 248, 0.14);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .brand-sub {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      margin-right: 2px;
+    }
+
+    .v-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-subtle);
+      margin: 0 4px;
+    }
+
+    /* Buttons */
+    button {
+      font-family: var(--font-sans);
+      cursor: pointer;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, transform 0.08s ease;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    button:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-strong);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button.active-cyan {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: rgba(56, 189, 248, 0.65);
+      color: #bae6fd;
+    }
+
+    button.active-emerald {
+      background: rgba(52, 211, 153, 0.2);
+      border-color: rgba(52, 211, 153, 0.65);
+      color: #a7f3d0;
+    }
+
+    button.active-amber {
+      background: rgba(251, 191, 36, 0.2);
+      border-color: rgba(251, 191, 36, 0.65);
+      color: #fde68a;
+    }
+
+    button.active-rose {
+      background: rgba(244, 63, 94, 0.24);
+      border-color: rgba(244, 63, 94, 0.8);
+      color: #fecdd3;
+      animation: warnPulse 1.6s infinite;
+    }
+
+    button.btn-impulse {
+      background: rgba(251, 191, 36, 0.13);
+      border-color: rgba(251, 191, 36, 0.42);
+      color: #fde68a;
+    }
+
+    button.btn-impulse:hover {
+      background: rgba(251, 191, 36, 0.24);
+      border-color: rgba(251, 191, 36, 0.75);
+    }
+
+    button.btn-bounce {
+      background: rgba(56, 189, 248, 0.14);
+      border-color: rgba(56, 189, 248, 0.45);
+      color: #bae6fd;
+    }
+
+    button.btn-bounce:hover {
+      background: rgba(56, 189, 248, 0.25);
+    }
+
+    button.btn-mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    @keyframes warnPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.5); }
+      50% { box-shadow: 0 0 0 5px rgba(244, 63, 94, 0); }
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      max-width: 1620px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 14px 16px 24px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+      flex: 1;
+    }
+
+    @media (min-width: 1080px) {
+      .workspace {
+        grid-template-columns: minmax(0, 1.85fr) minmax(360px, 1fr);
+      }
+    }
+
+    .left-column,
+    .right-column {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    /* Cards & Panels */
+    .panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .canvas-card {
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.48);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .canvas-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 12px;
+      background: rgba(20, 30, 48, 0.9);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .part-pills {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .part-pills button {
+      padding: 4px 8px;
+      font-size: 11px;
+      border-radius: 6px;
+    }
+
+    .layer-toggles {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11.5px;
+      color: var(--text-secondary);
+    }
+
+    .layer-toggles label {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .layer-toggles input[type="checkbox"] {
+      accent-color: var(--accent-cyan);
+      width: 14px;
+      height: 14px;
+      cursor: pointer;
+    }
+
+    /* Blueprint Grid Canvas Viewport */
+    .canvas-viewport {
+      position: relative;
+      width: 100%;
+      height: 410px;
+      min-height: 320px;
+      background-color: #0d1117;
+      background-image:
+        linear-gradient(to right, rgba(56, 189, 248, 0.055) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(56, 189, 248, 0.055) 1px, transparent 1px);
+      background-size: 28px 28px;
+      cursor: crosshair;
+      user-select: none;
+    }
+
+    @media (min-width: 640px) {
+      .canvas-viewport {
+        height: 485px;
+      }
+    }
+
+    @media (min-width: 1280px) {
+      .canvas-viewport {
+        height: 530px;
+      }
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Canvas Overlay HUD Boxes */
+    .hud-box {
+      position: absolute;
+      top: 10px;
+      background: rgba(9, 13, 22, 0.86);
+      border: 1px solid rgba(51, 74, 112, 0.75);
+      border-radius: 10px;
+      padding: 8px 11px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      backdrop-filter: blur(4px);
+    }
+
+    .hud-left { left: 10px; }
+    .hud-right { right: 10px; }
+
+    .hud-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .hud-k { color: var(--text-secondary); }
+    .hud-v { font-weight: 700; color: var(--text-primary); }
+
+    .status-pill {
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 700;
+      font-size: 10.5px;
+    }
+
+    .status-ok {
+      background: rgba(52, 211, 153, 0.18);
+      color: #6ee7b7;
+    }
+
+    .status-blown {
+      background: rgba(244, 63, 94, 0.25);
+      color: #fda4af;
+    }
+
+    .canvas-hint {
+      position: absolute;
+      bottom: 8px;
+      right: 10px;
+      background: rgba(9, 13, 22, 0.8);
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 5px;
+      pointer-events: none;
+    }
+
+    .canvas-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: rgba(14, 21, 34, 0.95);
+      border: 1px solid var(--accent-cyan);
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-size: 11px;
+      color: #ffffff;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+      z-index: 20;
+      display: none;
+      max-width: 220px;
+    }
+
+    .canvas-tooltip strong {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--accent-cyan);
+      margin-bottom: 2px;
+    }
+
+    /* Lower Deck: Inspector + 4-Channel Oscilloscope */
+    .lower-deck {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    @media (min-width: 768px) {
+      .lower-deck {
+        grid-template-columns: 5fr 7fr;
+      }
+    }
+
+    .panel-kicker {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent-cyan);
+    }
+
+    .panel-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .insp-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+
+    .insp-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+    }
+
+    .metric-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(51, 74, 112, 0.55);
+      border-radius: 8px;
+      padding: 7px 9px;
+    }
+
+    .metric-label {
+      font-size: 9.5px;
+      color: var(--text-secondary);
+    }
+
+    .metric-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      margin-top: 2px;
+    }
+
+    /* Oscilloscope Box */
+    .scope-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .scope-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .scope-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .leg-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .leg-swatch {
+      width: 10px;
+      height: 2.5px;
+      display: inline-block;
+      border-radius: 2px;
+    }
+
+    .scope-viewport {
+      width: 100%;
+      height: 165px;
+      background: #080c13;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .scope-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      margin-top: 8px;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--text-secondary);
+    }
+
+    .warn-text {
+      color: var(--accent-rose);
+      font-weight: 700;
+      display: none;
+    }
+
+    /* Right Control Panel Sections */
+    .sec-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .sec-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .sec-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .sec-title {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-primary);
+    }
+
+    .val-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 5px;
+      background: rgba(56, 189, 248, 0.14);
+      color: #7dd3fc;
+    }
+
+    .control-block {
+      margin-bottom: 12px;
+    }
+
+    .control-block:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-divider {
+      padding-top: 11px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .slider-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .slider-label-row label {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .slider-sub {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .slider-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    /* Custom Precision Sliders */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      background: #1c283d;
+      border: 1px solid #304466;
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      border: 2px solid #090d16;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.65);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      border: 2px solid #090d16;
+      box-shadow: 0 0 8px rgba(56, 189, 248, 0.65);
+      cursor: pointer;
+    }
+
+    /* Button Grids */
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    @media (min-width: 460px) {
+      .grid-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+    .col-span-2 { grid-column: span 2; }
+
+    .sub-caption {
+      display: block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP CAD HEADER & QUICK PRESETS -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="brand-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 3h6M12 3v3M8 6h8M8 6l8 3-8 3 8 3-8 3h8M12 18v3M9 21h6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title-row">
+            <h1>MacPherson Strut Suspension</h1>
+            <span class="badge-tag">FRONT AXLE // HALF-CAR DYNAMICS</span>
+          </div>
+          <div class="brand-sub">Interactive Cutaway Kinematics, Bushing Compliance &amp; Hydraulic Damper Simulator</div>
+        </div>
+      </div>
+
+      <div class="toolbar-group">
+        <span class="toolbar-label">Presets:</span>
+        <button id="scen-oem" class="active-cyan" onclick="applyScenario('oem')">Healthy OEM</button>
+        <button id="scen-blownLeft" onclick="applyScenario('blownLeft')">Blown Left Shock</button>
+        <button id="scen-track" onclick="applyScenario('track')">Track Stiff</button>
+        <button id="scen-noSway" onclick="applyScenario('noSway')">No Sway Bar</button>
+        <button id="scen-wornBushings" onclick="applyScenario('wornBushings')">Worn Bushings</button>
+
+        <div class="v-divider"></div>
+
+        <button id="btnPause" class="btn-mono" onclick="togglePause()">⏸ PAUSE</button>
+        <button id="btnSlowMo" class="btn-mono" onclick="toggleSlowMo()">0.5× SLOW-MO</button>
+        <button id="btnReset" class="btn-mono" onclick="resetSimulation()">↺ RESET</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <main class="workspace">
+
+    <!-- LEFT / CENTER COLUMN: CUTAWAY DIAGRAM + INSPECTOR + 4-CHANNEL OSCILLOSCOPE -->
+    <div class="left-column">
+
+      <!-- INTERACTIVE CAD DIAGRAM VIEWPORT -->
+      <div class="canvas-card">
+        <div class="canvas-toolbar">
+          <div class="part-pills">
+            <span class="toolbar-label">Inspect Part:</span>
+            <button id="pill-strut" class="active-cyan" onclick="selectPart('strut')">Struts</button>
+            <button id="pill-mount" onclick="selectPart('mount')">Strut Mounts</button>
+            <button id="pill-controlArm" onclick="selectPart('controlArm')">Control Arms</button>
+            <button id="pill-swayBar" onclick="selectPart('swayBar')">Sway Bar &amp; Links</button>
+            <button id="pill-bushing" onclick="selectPart('bushing')">Bushings</button>
+          </div>
+
+          <div class="layer-toggles">
+            <label><input type="checkbox" id="toggleLabels" checked /> Callout Labels</label>
+            <label><input type="checkbox" id="toggleVectors" checked /> Force Vectors</label>
+          </div>
+        </div>
+
+        <div id="canvasWrapper" class="canvas-viewport">
+          <canvas id="suspensionCanvas"></canvas>
+
+          <!-- Top-Left Live HUD -->
+          <div class="hud-box hud-left">
+            <div class="hud-row">
+              <span class="hud-k">CHASSIS HEAVE</span>
+              <span id="hudHeave" class="hud-v" style="color:#38bdf8;">0.0 mm</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">BODY ROLL</span>
+              <span id="hudRoll" class="hud-v" style="color:#fbbf24;">0.0°</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">LATERAL G</span>
+              <span id="hudLatG" class="hud-v" style="color:#34d399;">0.00 G</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">LONGITUDINAL G</span>
+              <span id="hudLongG" class="hud-v" style="color:#a78bfa;">0.00 G</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">SWAY TORQUE</span>
+              <span id="hudSwayTorque" class="hud-v" style="color:#fde68a;">0 Nm</span>
+            </div>
+          </div>
+
+          <!-- Top-Right Live HUD -->
+          <div class="hud-box hud-right">
+            <div class="hud-row">
+              <span class="hud-k">L-STRUT</span>
+              <span id="hudLeftStrut" class="status-pill status-ok">OK (65%)</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">R-STRUT</span>
+              <span id="hudRightStrut" class="status-pill status-ok">OK (65%)</span>
+            </div>
+            <div class="hud-row">
+              <span class="hud-k">BUSHINGS</span>
+              <span id="hudBushing" class="hud-v">OEM RUBBER</span>
+            </div>
+          </div>
+
+          <!-- Floating Hover Tooltip -->
+          <div id="canvasTooltip" class="canvas-tooltip"></div>
+
+          <!-- Bottom Hint -->
+          <div class="canvas-hint">Hover or click any suspension part to inspect live loads &amp; geometry</div>
+        </div>
+      </div>
+
+      <!-- LOWER DECK: COMPONENT INSPECTOR + 4-CHANNEL OSCILLOSCOPE -->
+      <div class="lower-deck">
+
+        <!-- Component Inspector -->
+        <section class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div>
+            <div class="panel-header-row">
+              <span class="panel-kicker">Component Inspector</span>
+              <span id="inspBadge" class="badge-tag">SELECTED</span>
+            </div>
+            <h2 id="inspTitle" class="insp-title">MacPherson Strut &amp; Helical Coil Spring</h2>
+            <p id="inspDesc" class="insp-desc">
+              Combines a load-bearing helical coil spring with a telescoping hydraulic damper. The strut body also acts as the upper steering pivot axis, controlling camber and damping spring oscillations via calibrated oil valving.
+            </p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <div id="inspM1Label" class="metric-label">STRUT TRAVEL (L / R)</div>
+              <div id="inspM1Val" class="metric-val">0.0 / 0.0 mm</div>
+            </div>
+            <div class="metric-box">
+              <div id="inspM2Label" class="metric-label">DAMPER FORCE (L / R)</div>
+              <div id="inspM2Val" class="metric-val" style="color:#34d399;">0 / 0 N</div>
+            </div>
+            <div class="metric-box">
+              <div id="inspM3Label" class="metric-label">PISTON VELOCITY</div>
+              <div id="inspM3Val" class="metric-val" style="color:#e2e8f0;">0.00 / 0.00 m/s</div>
+            </div>
+            <div class="metric-box">
+              <div id="inspM4Label" class="metric-label">BUSHING STRAIN</div>
+              <div id="inspM4Val" class="metric-val" style="color:#fbbf24;">0%</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4-Channel Real-Time Telemetry Oscilloscope -->
+        <section class="panel" style="display:flex; flex-direction:column; justify-content:space-between;">
+          <div class="scope-header">
+            <div>
+              <span class="panel-kicker">4-Channel Live Oscilloscope</span>
+              <h3 class="scope-title">Heave, L/R Wheel Travel, Roll &amp; Damper Force</h3>
+            </div>
+            <div class="scope-legend">
+              <span class="leg-item" style="color:#38bdf8;"><span class="leg-swatch" style="background:#38bdf8;"></span>Heave (mm)</span>
+              <span class="leg-item" style="color:#34d399;"><span class="leg-swatch" style="background:#34d399;"></span>L/R Wheel (mm)</span>
+              <span class="leg-item" style="color:#fbbf24;"><span class="leg-swatch" style="background:#fbbf24;"></span>Roll (°)</span>
+              <span class="leg-item" style="color:#f43f5e;"><span class="leg-swatch" style="background:#f43f5e;"></span>Damper (kN)</span>
+            </div>
+          </div>
+
+          <div class="scope-viewport">
+            <canvas id="telemetryCanvas"></canvas>
+          </div>
+
+          <div class="scope-footer">
+            <span id="telemNote">Effective Damping Ratio: ζ ≈ 0.44 (Controlled OEM decay)</span>
+            <span id="telemBumpWarn" class="warn-text">⚠ BUMP STOP BOTTOMING!</span>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN: TUNING, FAULTS, ROAD & MANEUVER CONTROLS -->
+    <aside class="right-column">
+
+      <!-- 1. SHOCK TUNING & FAULTS -->
+      <section class="panel">
+        <div class="sec-head">
+          <div class="sec-title-wrap">
+            <span class="sec-dot" style="background:#f43f5e;"></span>
+            <h2 class="sec-title">1. Shock Tuning &amp; Faults</h2>
+          </div>
+          <span id="valDamping" class="val-pill">65%</span>
+        </div>
+
+        <!-- Shock Stiffness -->
+        <div class="control-block">
+          <div class="slider-label-row">
+            <label for="sliderDamping">Shock Stiffness (Valving Damping)</label>
+            <span id="descDamping" class="slider-sub">Sport / OEM</span>
+          </div>
+          <input type="range" id="sliderDamping" min="0" max="100" value="65" />
+          <div class="slider-ticks">
+            <span>0% (No Damping)</span>
+            <span>50% (OEM)</span>
+            <span>100% (Race)</span>
+          </div>
+        </div>
+
+        <!-- Blown Shock Selector -->
+        <div class="control-block control-divider">
+          <div class="slider-label-row">
+            <span style="font-size:12px; font-weight:500;">Blown Shock Selector (3% Damping)</span>
+            <span class="slider-sub" style="color:#fb7185;">OIL LEAK + BOUNCE</span>
+          </div>
+          <div class="grid-4">
+            <button id="blown-none" class="active-emerald" onclick="setBlownMode('none')">None (Healthy)</button>
+            <button id="blown-left" onclick="setBlownMode('left')">Left Blown</button>
+            <button id="blown-right" onclick="setBlownMode('right')">Right Blown</button>
+            <button id="blown-both" onclick="setBlownMode('both')">Both Blown</button>
+          </div>
+        </div>
+
+        <!-- Coil Spring Rate -->
+        <div class="control-block control-divider">
+          <div class="slider-label-row">
+            <label for="sliderSpring">Coil Spring Rate</label>
+            <span id="valSpring" class="slider-sub" style="color:#7dd3fc;">100% (45 N/mm)</span>
+          </div>
+          <input type="range" id="sliderSpring" min="50" max="150" value="100" />
+          <div class="slider-ticks">
+            <span>50% (Soft)</span>
+            <span>100% (OEM)</span>
+            <span>150% (Stiff)</span>
+          </div>
+        </div>
+
+        <!-- Sway Bar Stiffness -->
+        <div class="control-block control-divider">
+          <div class="slider-label-row">
+            <label for="sliderSway">Sway Bar Stiffness</label>
+            <span id="valSway" class="slider-sub" style="color:#6ee7b7;">100% (OEM)</span>
+          </div>
+          <input type="range" id="sliderSway" min="0" max="150" value="100" />
+          <div class="slider-ticks">
+            <span>0% (Disconnected)</span>
+            <span>100% (OEM)</span>
+            <span>150% (Track)</span>
+          </div>
+        </div>
+
+        <!-- Bushing Compound Selector -->
+        <div class="control-block control-divider">
+          <span class="sub-caption">BUSHING COMPOUND:</span>
+          <div class="grid-3">
+            <button id="bush-oem" class="active-cyan" onclick="setBushingMode('oem')">OEM Rubber</button>
+            <button id="bush-poly" onclick="setBushingMode('poly')">Polyurethane</button>
+            <button id="bush-worn" onclick="setBushingMode('worn')">Worn / Loose</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. ROAD SURFACE & ONE-SHOT IMPULSES -->
+      <section class="panel">
+        <div class="sec-head">
+          <div class="sec-title-wrap">
+            <span class="sec-dot" style="background:#fbbf24;"></span>
+            <h2 class="sec-title">2. Road Surface &amp; Impulses</h2>
+          </div>
+          <span id="valSpeed" class="val-pill" style="color:#fde68a; background:rgba(251,191,36,0.14);">35 mph</span>
+        </div>
+
+        <!-- Continuous Road Mode -->
+        <div class="control-block">
+          <span class="sub-caption">CONTINUOUS ROAD PROFILE:</span>
+          <div class="grid-3">
+            <button id="road-smooth" class="active-cyan" onclick="setRoadMode('smooth')">Smooth</button>
+            <button id="road-speedbump" onclick="setRoadMode('speedbump')">Speed Bumps</button>
+            <button id="road-pothole" onclick="setRoadMode('pothole')">Potholes</button>
+            <button id="road-washboard" onclick="setRoadMode('washboard')">Washboard</button>
+            <button id="road-curbdrop" class="col-span-2" onclick="setRoadMode('curbdrop')">Curb Drop (Asymmetric Step)</button>
+          </div>
+        </div>
+
+        <!-- One-Shot Impulse Buttons -->
+        <div class="control-block control-divider">
+          <span class="sub-caption">ONE-SHOT IMPULSE TRIGGERS:</span>
+          <div class="grid-3" style="margin-bottom:6px;">
+            <button id="imp-leftBump" class="btn-impulse" onclick="triggerImpulse('leftBump')">▲ Hit Left Bump</button>
+            <button id="imp-rightBump" class="btn-impulse" onclick="triggerImpulse('rightBump')">▲ Hit Right Bump</button>
+            <button id="imp-bothBumps" class="btn-impulse" onclick="triggerImpulse('bothBumps')">▲▲ Hit Both Bumps</button>
+          </div>
+          <div class="grid-2">
+            <button id="imp-leftPothole" class="btn-impulse" onclick="triggerImpulse('leftPothole')">▼ Left Pothole</button>
+            <button id="imp-bounceTest" class="btn-bounce" onclick="triggerImpulse('bounceTest')">⬇ Bounce Test / Drop Chassis</button>
+          </div>
+        </div>
+
+        <!-- Vehicle Speed Slider -->
+        <div class="control-block control-divider">
+          <div class="slider-label-row">
+            <label for="sliderSpeed">Vehicle Speed</label>
+            <span class="slider-sub">0 – 80 mph</span>
+          </div>
+          <input type="range" id="sliderSpeed" min="0" max="80" value="35" />
+        </div>
+      </section>
+
+      <!-- 3. DRIVING MANEUVERS & G-LOAD -->
+      <section class="panel">
+        <div class="sec-head">
+          <div class="sec-title-wrap">
+            <span class="sec-dot" style="background:#38bdf8;"></span>
+            <h2 class="sec-title">3. Driving Maneuvers &amp; G-Load</h2>
+          </div>
+          <span id="valSteer" class="val-pill">STRAIGHT</span>
+        </div>
+
+        <!-- Steering / Maneuver -->
+        <div class="control-block">
+          <span class="sub-caption">STEERING / CORNERING MANEUVER:</span>
+          <div class="grid-4" style="margin-bottom:8px;">
+            <button id="steer-straight" class="active-cyan" onclick="setSteerMode('straight')">↑ Straight</button>
+            <button id="steer-left" onclick="setSteerMode('left')">↰ Left Turn</button>
+            <button id="steer-right" onclick="setSteerMode('right')">↱ Right Turn</button>
+            <button id="steer-slalom" onclick="setSteerMode('slalom')">〰 Auto Slalom</button>
+          </div>
+          <input type="range" id="sliderSteer" min="-100" max="100" value="0" />
+          <div class="slider-ticks">
+            <span>Hard Left</span>
+            <span>Center</span>
+            <span>Hard Right</span>
+          </div>
+        </div>
+
+        <!-- Longitudinal Load -->
+        <div class="control-block control-divider">
+          <span class="sub-caption">LONGITUDINAL PITCH LOAD:</span>
+          <div class="grid-3">
+            <button id="long-cruise" class="active-cyan" onclick="setLongMode('cruise')">Cruise (0 G)</button>
+            <button id="long-brake" onclick="setLongMode('brake')">⬇ Hard Braking</button>
+            <button id="long-accel" onclick="setLongMode('accel')">⬆ Hard Accel</button>
+          </div>
+        </div>
+      </section>
+
+    </aside>
+  </main>
+
+  <!-- INLINE SELF-CONTAINED ENGINEERING SIMULATION & CANVAS RENDERER -->
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      // 1. ENGINEERING COMPONENT KNOWLEDGE BASE
+      // =========================================================================
+      const COMPONENT_INFO = {
+        strut: {
+          title: 'MacPherson Strut & Helical Coil Spring',
+          desc: 'Combines a load-bearing helical coil spring with a telescoping hydraulic damper. The strut body also serves as the upper structural locating member for the steering knuckle, controlling camber and damping spring oscillations via calibrated oil valving.',
+          m1: 'STRUT TRAVEL (L / R)',
+          m2: 'DAMPER FORCE (L / R)',
+          m3: 'PISTON VELOCITY (L / R)',
+          m4: 'BUMP STOP LOAD (L / R)'
+        },
+        mount: {
+          title: 'Upper Strut Mount & Bearing Plate',
+          desc: 'Bolts the top of the strut assembly into the vehicle fender strut tower. Contains a bonded elastomer isolator to filter high-frequency road NVH and an integrated thrust bearing allowing the entire strut to rotate during steering.',
+          m1: 'MOUNT FLEX (L / R)',
+          m2: 'TOWER DYNAMIC LOAD (L / R)',
+          m3: 'ISOLATOR COMPOUND',
+          m4: 'MOUNT STRAIN'
+        },
+        controlArm: {
+          title: 'Lower Control Arm (LCA) & Ball Joint',
+          desc: 'Pivots on two subframe bushings at its inner axis and connects to the bottom of the steering knuckle via a low-friction ball joint. Controls lateral track width and caster while swinging through an exact circular arc.',
+          m1: 'ARM SWING ANGLE (L / R)',
+          m2: 'DYNAMIC CAMBER (L / R)',
+          m3: 'BALL JOINT RADIAL LOAD',
+          m4: 'ARC KINEMATICS'
+        },
+        swayBar: {
+          title: 'Anti-Roll (Sway) Bar & End Links',
+          desc: 'A U-shaped spring-steel torsion bar mounted across the subframe in rubber D-bushings, linked to both struts via articulated ball-joint end links. Twisting the bar transfers vertical force between left and right wheels to resist body roll.',
+          m1: 'ANTI-ROLL TORQUE',
+          m2: 'CROSS-AXLE FORCE',
+          m3: 'BAR TWIST ANGLE',
+          m4: 'SWAY BAR STATUS'
+        },
+        bushing: {
+          title: 'Elastomeric Control Arm & Frame Bushings',
+          desc: 'Cylindrical metal-and-rubber sleeves pressed into control arm pivots and sway bar brackets. They deform elastically in radial and torsional shear to absorb harsh road impacts. Worn bushings introduce radial slop and alignment shift.',
+          m1: 'RADIAL SQUISH (L / R)',
+          m2: 'SHEAR FORCE (L / R)',
+          m3: 'COMPOUND STIFFNESS',
+          m4: 'BUSHING STRAIN'
+        }
+      };
+
+      // =========================================================================
+      // 2. VEHICLE CONSTANTS & EQUILIBRIUM-CENTERED HALF-CAR STATE
+      // =========================================================================
+      const VEH = {
+        g: 9.81,
+        M_S: 720,                 // Sprung front mass (kg)
+        W_S: 0.5 * 720 * 9.81,    // 3531.6 N static sprung load per corner
+        M_U: 42,                  // Unsprung mass per corner (kg)
+        W_U: 42 * 9.81,           // 412.02 N static unsprung weight per corner
+        W_T: 0.5 * 720 * 9.81 + 42 * 9.81, // 3943.62 N static tire contact load
+        I_roll: 255,              // Front half-car roll inertia (kg*m^2)
+        halfTrack: 0.76,          // Half track width (m)
+        cgHeight: 0.52,           // CG height above roll axis (m)
+        K_spring_nom: 45000,      // 100% nominal spring rate (45 N/mm = 45,000 N/m)
+        K_sway_nom: 22000,        // 100% nominal sway bar stiffness at wheel (N/m)
+        K_tire: 215000,           // Tire vertical stiffness (N/m)
+        C_tire: 880,              // Tire vertical damping (N*s/m)
+        C_damper_nom: 5600,       // 100% nominal damper rate (N*s/m)
+        bumpStart: 0.065,         // Progressive bump stop engagement (m)
+        droopStart: -0.075        // Progressive droop stop engagement (m)
+      };
+
+      const sim = {
+        paused: false,
+        slowMo: false,
+        time: 0,
+        roadScroll: 0,
+
+        // Tuning & Faults
+        dampingPct: 65,
+        blownMode: 'none',        // 'none' | 'left' | 'right' | 'both'
+        springPct: 100,
+        swayPct: 100,
+        bushingMode: 'oem',       // 'oem' | 'poly' | 'worn'
+
+        // Road & Driving Maneuvers
+        roadMode: 'smooth',       // 'smooth' | 'speedbump' | 'pothole' | 'washboard' | 'curbdrop'
+        speedMph: 35,
+        steerMode: 'straight',    // 'straight' | 'left' | 'right' | 'slalom'
+        steerInput: 0,            // -1 (left) to +1 (right)
+        longMode: 'cruise',       // 'cruise' | 'brake' | 'accel'
+
+        // Queued one-shot road obstacles
+        impulses: [],
+
+        // Equilibrium-Centered Dynamic State (all 0.0 at static rest)
+        zChassis: 0,              // m (+up, clamped [-0.13, 0.13])
+        vzChassis: 0,             // m/s
+        roll: 0,                  // rad (+right side down, clamped [-0.15, 0.15])
+        vRoll: 0,                 // rad/s
+        zWheelL: 0,               // m (+up, clamped [-0.15, 0.15])
+        vzWheelL: 0,              // m/s
+        zWheelR: 0,               // m (+up, clamped [-0.15, 0.15])
+        vzWheelR: 0,              // m/s
+
+        // Visual compliance states
+        bushDeflL: 0,
+        bushDeflR: 0,
+        mountDeflL: 0,
+        mountDeflR: 0,
+
+        // Live Telemetry Metrics
+        compL: 0,
+        compR: 0,
+        vCompL: 0,
+        vCompR: 0,
+        fSpringL: 0,
+        fSpringR: 0,
+        fDamperL: 0,
+        fDamperR: 0,
+        fStopL: 0,
+        fStopR: 0,
+        fSway: 0,
+        fTireTotalL: VEH.W_T,
+        fTireTotalR: VEH.W_T,
+        roadHL: 0,
+        roadHR: 0,
+        prevRoadHL: 0,
+        prevRoadHR: 0,
+        latG: 0,
+        longG: 0,
+        camberL: -0.8,
+        camberR: -0.8,
+        lcaAngleL: 0,
+        lcaAngleR: 0,
+
+        // Oil leak particles for blown shocks
+        oilDrops: [],
+
+        // 4-Channel Oscilloscope History Buffer
+        scope: {
+          len: 260,
+          heaveMm: new Array(260).fill(0),
+          wheelLMm: new Array(260).fill(0),
+          wheelRMm: new Array(260).fill(0),
+          rollDeg: new Array(260).fill(0),
+          damperKn: new Array(260).fill(0),
+          timer: 0
+        },
+
+        // Interactive Canvas State
+        selectedPart: 'strut',
+        hoveredPart: null,
+        pointerX: 0,
+        pointerY: 0,
+        hitboxes: []
+      };
+
+      // =========================================================================
+      // 3. SAFE DOM HELPERS
+      // =========================================================================
+      function byId(id) {
+        return document.getElementById(id);
+      }
+
+      function setText(id, txt) {
+        const el = byId(id);
+        if (el) el.textContent = txt;
+      }
+
+      function isBlownLeft() {
+        return sim.blownMode === 'left' || sim.blownMode === 'both';
+      }
+
+      function isBlownRight() {
+        return sim.blownMode === 'right' || sim.blownMode === 'both';
+      }
+
+      // =========================================================================
+      // 4. EQUILIBRIUM-CENTERED HALF-CAR PHYSICS ENGINE (8 SUBSTEPS)
+      // =========================================================================
+      function stepPhysics(rawDt) {
+        if (sim.paused) return;
+
+        // Clamp dt <= 0.033s and apply 0.5x slow-motion multiplier if active
+        const baseDt = Math.min(Math.max(rawDt || 0.016, 0.001), 0.033);
+        const frameDt = sim.slowMo ? baseDt * 0.5 : baseDt;
+        sim.time += frameDt;
+
+        const vVeh = sim.speedMph * 0.44704;
+        sim.roadScroll += vVeh * frameDt;
+
+        // Slalom automatic sinusoidal steering
+        if (sim.steerMode === 'slalom') {
+          sim.steerInput = Math.sin(sim.time * 2.1) * 0.85;
+          const sl = byId('sliderSteer');
+          if (sl) sl.value = String(Math.round(sim.steerInput * 100));
+          updateSteerBadge();
+        }
+
+        // Advance one-shot road impulses toward the wheels
+        const effSpeed = Math.max(vVeh, 6.5);
+        for (let i = sim.impulses.length - 1; i >= 0; i--) {
+          sim.impulses[i].dist -= effSpeed * frameDt;
+          if (sim.impulses[i].dist < -1.6) {
+            sim.impulses.splice(i, 1);
+          }
+        }
+
+        const subSteps = 8;
+        const h = frameDt / subSteps;
+
+        const K_spring = VEH.K_spring_nom * (sim.springPct / 100);
+        const K_sway = VEH.K_sway_nom * (sim.swayPct / 100);
+
+        const cNominal = (sim.dampingPct / 100) * VEH.C_damper_nom;
+        const cBlown = 0.03 * VEH.C_damper_nom; // 3% damping when blown
+        const cBaseL = isBlownLeft() ? cBlown : cNominal;
+        const cBaseR = isBlownRight() ? cBlown : cNominal;
+
+        let bushStiff = 1.0;
+        let bushPlay = 0.0;
+        if (sim.bushingMode === 'poly') {
+          bushStiff = 2.4;
+          bushPlay = 0.0;
+        } else if (sim.bushingMode === 'worn') {
+          bushStiff = 0.45;
+          bushPlay = 0.0045;
+        }
+
+        for (let s = 0; s < subSteps; s++) {
+          // 1. Road elevation & road vertical velocity
+          const road = evaluateRoadProfile();
+          const vzRoadL = (road.hL - sim.prevRoadHL) / h;
+          const vzRoadR = (road.hR - sim.prevRoadHR) / h;
+          sim.prevRoadHL = road.hL;
+          sim.prevRoadHR = road.hR;
+          sim.roadHL = road.hL;
+          sim.roadHR = road.hR;
+
+          // 2. Unilateral Tire Contact with Exact Static Weight Preload W_T
+          const tireDeflL = road.hL - sim.zWheelL;
+          const tireDeflR = road.hR - sim.zWheelR;
+
+          const fTireTotalL = (VEH.W_T + VEH.K_tire * tireDeflL > 0)
+            ? Math.max(0, VEH.W_T + VEH.K_tire * tireDeflL + VEH.C_tire * (vzRoadL - sim.vzWheelL))
+            : 0;
+
+          const fTireTotalR = (VEH.W_T + VEH.K_tire * tireDeflR > 0)
+            ? Math.max(0, VEH.W_T + VEH.K_tire * tireDeflR + VEH.C_tire * (vzRoadR - sim.vzWheelR))
+            : 0;
+
+          // Net dynamic tire force (0 at rest, -W_T when airborne)
+          const fTireNetL = fTireTotalL - VEH.W_T;
+          const fTireNetR = fTireTotalR - VEH.W_T;
+
+          // 3. Strut Tower Vertical Heights & Velocities (+roll = right side down)
+          const zTowerL = sim.zChassis + VEH.halfTrack * sim.roll;
+          const zTowerR = sim.zChassis - VEH.halfTrack * sim.roll;
+          const vzTowerL = sim.vzChassis + VEH.halfTrack * sim.vRoll;
+          const vzTowerR = sim.vzChassis - VEH.halfTrack * sim.vRoll;
+
+          // 4. Strut Compression & Piston Velocity (+ = compressing)
+          const compL = sim.zWheelL - zTowerL;
+          const compR = sim.zWheelR - zTowerR;
+          const vCompL = sim.vzWheelL - vzTowerL;
+          const vCompR = sim.vzWheelR - vzTowerR;
+
+          // Bushing radial compliance deadband
+          const effCompL = compL - Math.sign(compL) * Math.min(Math.abs(compL), bushPlay * 0.5);
+          const effCompR = compR - Math.sign(compR) * Math.min(Math.abs(compR), bushPlay * 0.5);
+
+          // 5. Coil Spring Forces
+          const fSpringL = K_spring * effCompL;
+          const fSpringR = K_spring * effCompR;
+
+          // 6. Asymmetric Hydraulic Damper Forces (Rebound stiffer than compression)
+          const asymL = vCompL >= 0 ? 0.72 : 1.48;
+          const asymR = vCompR >= 0 ? 0.72 : 1.48;
+          const fDamperL = cBaseL * asymL * vCompL;
+          const fDamperR = cBaseR * asymR * vCompR;
+
+          // 7. Progressive Bump Stop (comp > 0.065m) & Droop Stop (comp < -0.075m)
+          const fStopL = computeTravelStops(compL, vCompL);
+          const fStopR = computeTravelStops(compR, vCompR);
+
+          // 8. Anti-Roll Sway Bar Force: F_sway = K_sway * (compR - compL)
+          const fSway = K_sway * (compR - compL);
+
+          // Net dynamic suspension forces acting UP on chassis towers & DOWN on wheels
+          const fSuspL = fSpringL + fDamperL + fStopL - fSway;
+          const fSuspR = fSpringR + fDamperR + fStopR + fSway;
+
+          // 9. Lateral G Cornering Torque & Longitudinal G Braking Dive / Accel Lift
+          const speedFactor = Math.min(1.25, Math.max(0.25, sim.speedMph / 40));
+          const targetLatG = sim.steerInput * 0.88 * speedFactor;
+          sim.latG += (targetLatG - sim.latG) * Math.min(1, h * 14);
+
+          let targetLongG = 0;
+          if (sim.longMode === 'brake') targetLongG = -0.85;
+          else if (sim.longMode === 'accel') targetLongG = 0.75;
+          sim.longG += (targetLongG - sim.longG) * Math.min(1, h * 14);
+
+          // Right turn (latG > 0) rolls chassis left (roll < 0), compressing Left outer strut
+          const cornerRollTorque = -VEH.M_S * (sim.latG * VEH.g) * VEH.cgHeight;
+          // Braking (longG < 0) dives front chassis down (negative vertical force)
+          const pitchHeaveForce = sim.longG * 3100;
+
+          // 10. Accelerations
+          const azChassis = (fSuspL + fSuspR + pitchHeaveForce) / VEH.M_S;
+          const aRoll = (cornerRollTorque + (fSuspL - fSuspR) * VEH.halfTrack) / VEH.I_roll;
+
+          const azWheelL = (fTireNetL - fSuspL) / VEH.M_U;
+          const azWheelR = (fTireNetR - fSuspR) / VEH.M_U;
+
+          // Velocity-first Symplectic Euler integration
+          sim.vzChassis += azChassis * h;
+          sim.zChassis += sim.vzChassis * h;
+
+          sim.vRoll += aRoll * h;
+          sim.roll += sim.vRoll * h;
+
+          sim.vzWheelL += azWheelL * h;
+          sim.zWheelL += sim.vzWheelL * h;
+
+          sim.vzWheelR += azWheelR * h;
+          sim.zWheelR += sim.vzWheelR * h;
+
+          // Finite-value guards & specified kinematic clamps
+          guardAndClampStates();
+
+          // Save instantaneous forces
+          sim.compL = compL;
+          sim.compR = compR;
+          sim.vCompL = vCompL;
+          sim.vCompR = vCompR;
+          sim.fSpringL = fSpringL;
+          sim.fSpringR = fSpringR;
+          sim.fDamperL = fDamperL;
+          sim.fDamperR = fDamperR;
+          sim.fStopL = fStopL;
+          sim.fStopR = fStopR;
+          sim.fSway = fSway;
+          sim.fTireTotalL = fTireTotalL;
+          sim.fTireTotalR = fTireTotalR;
+
+          // Bushing & Strut Mount visual compliance
+          const targetBushL = ((fSuspL + VEH.W_S * 0.15) / 14000) / bushStiff;
+          const targetBushR = ((fSuspR + VEH.W_S * 0.15) / 14000) / bushStiff;
+          sim.bushDeflL += (targetBushL - sim.bushDeflL) * Math.min(1, h * 35);
+          sim.bushDeflR += (targetBushR - sim.bushDeflR) * Math.min(1, h * 35);
+
+          const targetMountL = ((fSpringL + fDamperL + fStopL) / 15000) / bushStiff;
+          const targetMountR = ((fSpringR + fDamperR + fStopR) / 15000) / bushStiff;
+          sim.mountDeflL += (targetMountL - sim.mountDeflL) * Math.min(1, h * 40);
+          sim.mountDeflR += (targetMountR - sim.mountDeflR) * Math.min(1, h * 40);
+        }
+
+        // Update oil leak droplets for blown shocks
+        updateOilDrops(frameDt);
+
+        // Sample 4-channel oscilloscope at ~50 Hz
+        sim.scope.timer += frameDt;
+        if (sim.scope.timer >= 0.02) {
+          sim.scope.timer = 0;
+          sim.scope.heaveMm.push(sim.zChassis * 1000);
+          sim.scope.heaveMm.shift();
+          sim.scope.wheelLMm.push(sim.zWheelL * 1000);
+          sim.scope.wheelLMm.shift();
+          sim.scope.wheelRMm.push(sim.zWheelR * 1000);
+          sim.scope.wheelRMm.shift();
+          sim.scope.rollDeg.push((sim.roll * 180) / Math.PI);
+          sim.scope.rollDeg.shift();
+          const peakDamper = Math.abs(sim.fDamperL) >= Math.abs(sim.fDamperR) ? sim.fDamperL : sim.fDamperR;
+          sim.scope.damperKn.push(peakDamper / 1000);
+          sim.scope.damperKn.shift();
+        }
+      }
+
+      function computeTravelStops(comp, vComp) {
+        let f = 0;
+        if (comp > VEH.bumpStart) {
+          const over = comp - VEH.bumpStart;
+          f += 460000 * over * over + 38000 * over + Math.max(0, vComp) * 3200;
+        } else if (comp < VEH.droopStart) {
+          const over = comp - VEH.droopStart;
+          f += -420000 * over * over + 34000 * over + Math.min(0, vComp) * 2800;
+        }
+        return f;
+      }
+
+      function guardAndClampStates() {
+        if (!Number.isFinite(sim.zChassis)) sim.zChassis = 0;
+        if (!Number.isFinite(sim.vzChassis)) sim.vzChassis = 0;
+        if (!Number.isFinite(sim.roll)) sim.roll = 0;
+        if (!Number.isFinite(sim.vRoll)) sim.vRoll = 0;
+        if (!Number.isFinite(sim.zWheelL)) sim.zWheelL = 0;
+        if (!Number.isFinite(sim.vzWheelL)) sim.vzWheelL = 0;
+        if (!Number.isFinite(sim.zWheelR)) sim.zWheelR = 0;
+        if (!Number.isFinite(sim.vzWheelR)) sim.vzWheelR = 0;
+
+        if (sim.zChassis > 0.13) { sim.zChassis = 0.13; if (sim.vzChassis > 0) sim.vzChassis = 0; }
+        if (sim.zChassis < -0.13) { sim.zChassis = -0.13; if (sim.vzChassis < 0) sim.vzChassis = 0; }
+
+        if (sim.roll > 0.15) { sim.roll = 0.15; if (sim.vRoll > 0) sim.vRoll = 0; }
+        if (sim.roll < -0.15) { sim.roll = -0.15; if (sim.vRoll < 0) sim.vRoll = 0; }
+
+        if (sim.zWheelL > 0.15) { sim.zWheelL = 0.15; if (sim.vzWheelL > 0) sim.vzWheelL = 0; }
+        if (sim.zWheelL < -0.15) { sim.zWheelL = -0.15; if (sim.vzWheelL < 0) sim.vzWheelL = 0; }
+
+        if (sim.zWheelR > 0.15) { sim.zWheelR = 0.15; if (sim.vzWheelR > 0) sim.vzWheelR = 0; }
+        if (sim.zWheelR < -0.15) { sim.zWheelR = -0.15; if (sim.vzWheelR < 0) sim.vzWheelR = 0; }
+      }
+
+      function evaluateRoadProfile() {
+        let hL = 0;
+        let hR = 0;
+        const d = sim.roadScroll;
+
+        if (sim.roadMode === 'speedbump') {
+          const phase = ((d % 8.5) + 8.5) % 8.5;
+          if (phase < 1.05) {
+            const b = Math.sin((phase / 1.05) * Math.PI) * 0.052;
+            hL += b;
+            hR += b;
+          }
+        } else if (sim.roadMode === 'pothole') {
+          const pL = ((d % 8.0) + 8.0) % 8.0;
+          if (pL < 0.95) hL -= Math.sin((pL / 0.95) * Math.PI) * 0.056;
+          const pR = (((d + 4.0) % 8.0) + 8.0) % 8.0;
+          if (pR < 0.85) hR -= Math.sin((pR / 0.85) * Math.PI) * 0.042;
+        } else if (sim.roadMode === 'washboard') {
+          if (sim.speedMph > 0.5) {
+            hL += Math.sin(d * 9.5) * 0.015 + Math.sin(d * 19.0) * 0.005;
+            hR += Math.sin(d * 9.5 + 0.7) * 0.015 + Math.cos(d * 18.0) * 0.005;
+          }
+        } else if (sim.roadMode === 'curbdrop') {
+          const p = ((d % 9.0) + 9.0) % 9.0;
+          if (p > 2.5 && p < 6.5) {
+            const ramp = Math.min(1, (p - 2.5) / 0.35) * Math.min(1, (6.5 - p) / 0.35);
+            hR -= 0.048 * ramp;
+          }
+        }
+
+        // One-shot impulses passing under tires
+        for (const imp of sim.impulses) {
+          if (Math.abs(imp.dist) < imp.width * 0.5) {
+            const u = (imp.dist + imp.width * 0.5) / imp.width;
+            const wave = Math.sin(u * Math.PI) * imp.height;
+            if (imp.side === 'left' || imp.side === 'both') hL += wave;
+            if (imp.side === 'right' || imp.side === 'both') hR += wave;
+          }
+        }
+
+        return { hL, hR };
+      }
+
+      function updateOilDrops(dt) {
+        if (isBlownLeft() && Math.random() < dt * (7 + Math.abs(sim.vCompL) * 45)) {
+          sim.oilDrops.push({
+            side: 'left',
+            progress: 0,
+            speed: 0.55 + Math.random() * 0.45,
+            size: 2.2 + Math.random() * 1.6,
+            alpha: 0.95
+          });
+        }
+        if (isBlownRight() && Math.random() < dt * (7 + Math.abs(sim.vCompR) * 45)) {
+          sim.oilDrops.push({
+            side: 'right',
+            progress: 0,
+            speed: 0.55 + Math.random() * 0.45,
+            size: 2.2 + Math.random() * 1.6,
+            alpha: 0.95
+          });
+        }
+
+        for (let i = sim.oilDrops.length - 1; i >= 0; i--) {
+          const p = sim.oilDrops[i];
+          p.progress += p.speed * dt;
+          if (p.progress > 1.25) p.alpha -= dt * 2.5;
+          if (p.alpha <= 0) sim.oilDrops.splice(i, 1);
+        }
+      }
+
+      // =========================================================================
+      // 5. HIGH-DPI CUTAWAY BLUEPRINT RENDERER
+      // =========================================================================
+      function resizeCanvases() {
+        const wrapper = byId('canvasWrapper');
+        const cMain = byId('suspensionCanvas');
+        if (wrapper && cMain) {
+          const rect = wrapper.getBoundingClientRect();
+          const cssW = Math.max(300, Math.floor(rect.width || 800));
+          const cssH = Math.max(300, Math.floor(rect.height || 480));
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          cMain.width = Math.round(cssW * dpr);
+          cMain.height = Math.round(cssH * dpr);
+          const ctx = cMain.getContext('2d');
+          if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        const cScope = byId('telemetryCanvas');
+        if (cScope && cScope.parentElement) {
+          const sRect = cScope.parentElement.getBoundingClientRect();
+          const sW = Math.max(260, Math.floor(sRect.width || 420));
+          const sH = Math.max(120, Math.floor(sRect.height || 165));
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          cScope.width = Math.round(sW * dpr);
+          cScope.height = Math.round(sH * dpr);
+          const sCtx = cScope.getContext('2d');
+          if (sCtx) sCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+      }
+
+      function renderDiagram() {
+        const cMain = byId('suspensionCanvas');
+        if (!cMain) return;
+        const ctx = cMain.getContext('2d');
+        if (!ctx) return;
+
+        const rect = cMain.getBoundingClientRect();
+        const w = Math.max(300, rect.width || 800);
+        const h = Math.max(300, rect.height || 480);
+
+        ctx.clearRect(0, 0, w, h);
+        sim.hitboxes = [];
+
+        const scale = Math.min(w / 960, h / 540);
+        const cx = w * 0.5;
+        const groundY = h * 0.83;
+        const pxPerMeter = 620 * scale;
+
+        // Equilibrium chassis center height + heave
+        const baseChassisY = groundY - 192 * scale;
+        const chassisY = baseChassisY - sim.zChassis * pxPerMeter;
+        // +roll = right side down (clockwise rotation on screen)
+        const rollAngle = sim.roll;
+
+        function toChassisWorld(lx, ly) {
+          const cosR = Math.cos(rollAngle);
+          const sinR = Math.sin(rollAngle);
+          return {
+            x: cx + lx * cosR - ly * sinR,
+            y: chassisY + lx * sinR + ly * cosR
+          };
+        }
+
+        // A. Road Surface & Scrolling Distance Markers
+        drawRoadAndTracks(ctx, w, h, cx, groundY, scale, pxPerMeter);
+
+        // B. Compute Left & Right Kinematics
+        const sides = [
+          {
+            id: 'left',
+            sign: -1,
+            zW: sim.zWheelL,
+            comp: sim.compL,
+            vComp: sim.vCompL,
+            fSpring: sim.fSpringL,
+            fDamper: sim.fDamperL,
+            fStop: sim.fStopL,
+            fTire: sim.fTireTotalL,
+            bushDefl: sim.bushDeflL,
+            mountDefl: sim.mountDeflL,
+            blown: isBlownLeft()
+          },
+          {
+            id: 'right',
+            sign: 1,
+            zW: sim.zWheelR,
+            comp: sim.compR,
+            vComp: sim.vCompR,
+            fSpring: sim.fSpringR,
+            fDamper: sim.fDamperR,
+            fStop: sim.fStopR,
+            fTire: sim.fTireTotalR,
+            bushDefl: sim.bushDeflR,
+            mountDefl: sim.mountDeflR,
+            blown: isBlownRight()
+          }
+        ];
+
+        const kin = {};
+
+        for (const s of sides) {
+          const dir = s.sign;
+
+          // Strut tower mount point
+          const pTower = toChassisWorld(dir * 212 * scale, -118 * scale);
+          const mountShiftY = -s.mountDefl * 14 * scale;
+          const pMount = {
+            x: pTower.x - Math.sin(rollAngle) * mountShiftY,
+            y: pTower.y + Math.cos(rollAngle) * mountShiftY
+          };
+
+          // Inner Lower Control Arm (LCA) subframe pivot
+          const pLcaInBase = toChassisWorld(dir * 102 * scale, 56 * scale);
+          const bushShiftY = -s.bushDefl * 12 * scale;
+          const pLcaIn = {
+            x: pLcaInBase.x,
+            y: pLcaInBase.y + bushShiftY
+          };
+
+          // Wheel center & Lower Ball Joint along exact circular arc
+          const wheelRadius = 82 * scale;
+          const wheelCenterY = (groundY - wheelRadius) - s.zW * pxPerMeter;
+          const ballJointY = wheelCenterY + 34 * scale;
+
+          const lcaLen = 152 * scale;
+          const dy = Math.max(-lcaLen * 0.85, Math.min(lcaLen * 0.85, ballJointY - pLcaIn.y));
+          const dx = dir * Math.sqrt(Math.max(100, lcaLen * lcaLen - dy * dy));
+          const pBall = {
+            x: pLcaIn.x + dx,
+            y: pLcaIn.y + dy
+          };
+
+          const wheelCenterX = pBall.x + dir * 26 * scale;
+          const pStrutBottom = {
+            x: pBall.x + dir * 6 * scale,
+            y: pBall.y - 24 * scale
+          };
+
+          const svx = pMount.x - pStrutBottom.x;
+          const svy = pMount.y - pStrutBottom.y;
+          const strutLen = Math.max(20 * scale, Math.hypot(svx, svy));
+          const ux = svx / strutLen;
+          const uy = svy / strutLen;
+
+          const strutAngleRad = Math.atan2(svx, -svy);
+          const camberDeg = (strutAngleRad * 180 / Math.PI) * dir - 5.2;
+          if (s.id === 'left') sim.camberL = camberDeg;
+          else sim.camberR = camberDeg;
+
+          const lcaDeg = Math.atan2(pBall.y - pLcaIn.y, Math.abs(pBall.x - pLcaIn.x)) * 180 / Math.PI;
+          if (s.id === 'left') sim.lcaAngleL = lcaDeg;
+          else sim.lcaAngleR = lcaDeg;
+
+          // Sway bar end link tab on strut body
+          const pSwayTab = {
+            x: pStrutBottom.x + ux * (strutLen * 0.36) - dir * 10 * scale,
+            y: pStrutBottom.y + uy * (strutLen * 0.36)
+          };
+
+          // Sway bar torsion arm tip
+          const pSwayArmEnd = toChassisWorld(dir * 195 * scale, 38 * scale - (s.comp * 130 * scale));
+
+          kin[s.id] = {
+            ...s,
+            pTower,
+            pMount,
+            pLcaIn,
+            pBall,
+            wheelCenterX,
+            wheelCenterY,
+            wheelRadius,
+            pStrutBottom,
+            strutLen,
+            ux,
+            uy,
+            strutAngleRad,
+            pSwayTab,
+            pSwayArmEnd
+          };
+        }
+
+        // C. Semi-Transparent Car Body Silhouette + Subframe Cradle & Towers
+        drawChassisFrame(ctx, cx, chassisY, rollAngle, scale);
+
+        // D. Anti-Roll Sway Bar & Subframe Bushings
+        drawSwayBarAssembly(ctx, scale, toChassisWorld, kin.left, kin.right);
+
+        // E. Left & Right Suspension Assemblies
+        const showVectors = Boolean(byId('toggleVectors') && byId('toggleVectors').checked);
+        for (const id of ['left', 'right']) {
+          const k = kin[id];
+          drawWheelAndTire(ctx, k, scale);
+          drawSteeringKnuckle(ctx, k, scale);
+          drawControlArmAndBushing(ctx, k, scale);
+          drawStrutAndSpring(ctx, k, scale);
+          drawStrutMount(ctx, k, scale);
+          drawSwayBarLink(ctx, k, scale);
+          if (showVectors) drawForceVectors(ctx, k, scale);
+        }
+
+        // F. Oil Leak Droplets & Blown Badges
+        drawOilLeakEffects(ctx, kin, scale);
+
+        // G. CAD Callout Labels
+        const showLabels = Boolean(byId('toggleLabels') && byId('toggleLabels').checked);
+        if (showLabels) {
+          drawCalloutLabels(ctx, w, scale, kin);
+        }
+      }
+
+      function drawRoadAndTracks(ctx, w, h, cx, groundY, scale, pxPerMeter) {
+        const gTop = Math.max(0, Math.min(h - 10, groundY));
+        const roadGrad = ctx.createLinearGradient(0, gTop, 0, h);
+        roadGrad.addColorStop(0, '#182234');
+        roadGrad.addColorStop(0.3, '#0f172a');
+        roadGrad.addColorStop(1, '#060911');
+        ctx.fillStyle = roadGrad;
+        ctx.fillRect(0, gTop, w, h - gTop);
+
+        const leftTrackX = cx - 268 * scale;
+        const rightTrackX = cx + 268 * scale;
+        const trackW = 92 * scale;
+
+        for (const tx of [leftTrackX, rightTrackX]) {
+          ctx.save();
+          ctx.fillStyle = 'rgba(30, 41, 59, 0.55)';
+          ctx.beginPath();
+          ctx.moveTo(tx - trackW * 0.5, gTop);
+          ctx.lineTo(tx + trackW * 0.5, gTop);
+          ctx.lineTo(tx + trackW * 0.72, h);
+          ctx.lineTo(tx - trackW * 0.72, h);
+          ctx.closePath();
+          ctx.fill();
+
+          // Scrolling road distance markers
+          ctx.strokeStyle = 'rgba(148, 163, 184, 0.2)';
+          ctx.lineWidth = 1.5;
+          const step = Math.max(12, 26 * scale);
+          const offset = (sim.roadScroll * 90 * scale) % step;
+          for (let y = gTop + offset; y < h; y += step) {
+            const t = (y - gTop) / Math.max(1, h - gTop);
+            const halfSpan = trackW * (0.48 + t * 0.22);
+            ctx.beginPath();
+            ctx.moveTo(tx - halfSpan, y);
+            ctx.lineTo(tx + halfSpan, y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        // Cross-sectional terrain profile under tires
+        ctx.save();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = Math.max(1.5, 2.5 * scale);
+        ctx.beginPath();
+        const samples = 120;
+        for (let i = 0; i <= samples; i++) {
+          const x = (i / samples) * w;
+          const distL = Math.abs(x - leftTrackX) / Math.max(20, 68 * scale);
+          const distR = Math.abs(x - rightTrackX) / Math.max(20, 68 * scale);
+          let localBumpPx = 0;
+          if (distL < 1) localBumpPx += Math.cos(distL * Math.PI * 0.5) * sim.roadHL * pxPerMeter;
+          if (distR < 1) localBumpPx += Math.cos(distR * Math.PI * 0.5) * sim.roadHR * pxPerMeter;
+          const y = gTop - localBumpPx;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        // Approaching one-shot impulses
+        for (const imp of sim.impulses) {
+          if (imp.dist > -0.2 && imp.dist < 4.5) {
+            const norm = Math.min(1, Math.max(0, imp.dist / 4.5));
+            const by = gTop + norm * (h - gTop - 8);
+            const drawSides = imp.side === 'both'
+              ? [leftTrackX, rightTrackX]
+              : (imp.side === 'left' ? [leftTrackX] : [rightTrackX]);
+            for (const sx of drawSides) {
+              const bw = trackW * (0.55 + norm * 0.22) * 1.55;
+              ctx.fillStyle = imp.height < 0 ? 'rgba(244, 63, 94, 0.85)' : 'rgba(251, 191, 36, 0.88)';
+              ctx.beginPath();
+              ctx.roundRect(sx - bw * 0.5, by - 4 * scale, bw, Math.max(4, 8 * scale), 4);
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      function drawChassisFrame(ctx, cx, chassisY, rollAngle, scale) {
+        ctx.save();
+        ctx.translate(cx, chassisY);
+        ctx.rotate(rollAngle);
+
+        // Semi-transparent car body silhouette (hood, windshield, fenders)
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.22)';
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+        ctx.lineWidth = 1.4 * scale;
+        ctx.beginPath();
+        ctx.moveTo(-295 * scale, -72 * scale);
+        ctx.quadraticCurveTo(-275 * scale, -148 * scale, -185 * scale, -162 * scale);
+        ctx.lineTo(-140 * scale, -212 * scale);
+        ctx.lineTo(140 * scale, -212 * scale);
+        ctx.lineTo(185 * scale, -162 * scale);
+        ctx.quadraticCurveTo(275 * scale, -148 * scale, 295 * scale, -72 * scale);
+        ctx.lineTo(255 * scale, -72 * scale);
+        ctx.lineTo(-255 * scale, -72 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Central engine block outline
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.35)';
+        ctx.strokeStyle = 'rgba(71, 85, 105, 0.45)';
+        ctx.lineWidth = 1.5 * scale;
+        ctx.beginPath();
+        ctx.roundRect(-78 * scale, -108 * scale, 156 * scale, 128 * scale, 12 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        // Main Unibody Strut Towers & Lower Subframe Crossmember
+        const bodyGrad = ctx.createLinearGradient(0, -145 * scale, 0, 75 * scale);
+        bodyGrad.addColorStop(0, '#1e293b');
+        bodyGrad.addColorStop(0.55, '#172033');
+        bodyGrad.addColorStop(1, '#0f172a');
+
+        ctx.fillStyle = bodyGrad;
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 2 * scale;
+
+        ctx.beginPath();
+        ctx.moveTo(-242 * scale, -105 * scale);
+        ctx.quadraticCurveTo(-244 * scale, -138 * scale, -212 * scale, -138 * scale);
+        ctx.quadraticCurveTo(-180 * scale, -138 * scale, -172 * scale, -95 * scale);
+        ctx.lineTo(-92 * scale, -95 * scale);
+        ctx.lineTo(-76 * scale, -116 * scale);
+        ctx.lineTo(76 * scale, -116 * scale);
+        ctx.lineTo(92 * scale, -95 * scale);
+        ctx.lineTo(172 * scale, -95 * scale);
+        ctx.quadraticCurveTo(180 * scale, -138 * scale, 212 * scale, -138 * scale);
+        ctx.quadraticCurveTo(244 * scale, -138 * scale, 242 * scale, -105 * scale);
+        ctx.lineTo(222 * scale, -102 * scale);
+        ctx.quadraticCurveTo(188 * scale, -118 * scale, 152 * scale, -30 * scale);
+        ctx.lineTo(126 * scale, 35 * scale);
+        ctx.lineTo(132 * scale, 68 * scale);
+        ctx.lineTo(-132 * scale, 68 * scale);
+        ctx.lineTo(-126 * scale, 35 * scale);
+        ctx.lineTo(-152 * scale, -30 * scale);
+        ctx.quadraticCurveTo(-188 * scale, -118 * scale, -222 * scale, -102 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Subframe lightening cutouts
+        ctx.fillStyle = '#090e18';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1.4 * scale;
+        for (const sign of [-1, 1]) {
+          ctx.beginPath();
+          ctx.roundRect(sign * 34 * scale - 24 * scale, 42 * scale, 48 * scale, 16 * scale, 5 * scale);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        // CG Reticle
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(0, -18 * scale, Math.max(3, 9 * scale), 0, Math.PI * 2);
+        ctx.moveTo(-14 * scale, -18 * scale);
+        ctx.lineTo(14 * scale, -18 * scale);
+        ctx.moveTo(0, -32 * scale);
+        ctx.lineTo(0, -4 * scale);
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = `600 ${Math.max(9, Math.round(10 * scale))}px monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillText('SPRUNG CHASSIS / SUBFRAME', 0, 26 * scale);
+
+        ctx.restore();
+      }
+
+      function drawSwayBarAssembly(ctx, scale, toChassisWorld, kL, kR) {
+        const active = sim.selectedPart === 'swayBar' || sim.hoveredPart === 'swayBar';
+        const disconnected = sim.swayPct === 0;
+
+        const pFrameL = toChassisWorld(-84 * scale, 36 * scale);
+        const pFrameR = toChassisWorld(84 * scale, 36 * scale);
+
+        const stressRatio = disconnected ? 0 : Math.min(1, Math.abs(sim.fSway) / 2600);
+        let barColor = '#38bdf8';
+        if (disconnected) barColor = '#334155';
+        else if (stressRatio > 0.55) barColor = '#f43f5e';
+        else if (stressRatio > 0.18) barColor = '#fbbf24';
+
+        ctx.save();
+        if (active || stressRatio > 0.15) {
+          ctx.shadowColor = active ? '#38bdf8' : barColor;
+          ctx.shadowBlur = active ? 14 : 12 * stressRatio;
+        }
+
+        ctx.strokeStyle = active ? '#7dd3fc' : barColor;
+        ctx.lineWidth = (disconnected ? 4 : 7.5) * scale;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        if (disconnected) ctx.setLineDash([6 * scale, 6 * scale]);
+
+        ctx.beginPath();
+        ctx.moveTo(kL.pSwayArmEnd.x, kL.pSwayArmEnd.y);
+        ctx.quadraticCurveTo(pFrameL.x - 28 * scale, pFrameL.y - 6 * scale, pFrameL.x, pFrameL.y);
+        ctx.lineTo(pFrameR.x, pFrameR.y);
+        ctx.quadraticCurveTo(pFrameR.x + 28 * scale, pFrameR.y - 6 * scale, kR.pSwayArmEnd.x, kR.pSwayArmEnd.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'swayBar',
+          type: 'line',
+          x1: pFrameL.x,
+          y1: pFrameL.y,
+          x2: pFrameR.x,
+          y2: pFrameR.y,
+          r: 16 * scale
+        });
+
+        for (const pt of [pFrameL, pFrameR]) {
+          drawBushingElement(ctx, pt.x, pt.y, Math.max(5, 11 * scale), stressRatio * 0.7, scale);
+        }
+      }
+
+      function drawWheelAndTire(ctx, k, scale) {
+        const { wheelCenterX: wx, wheelCenterY: wy, wheelRadius: wr, sign: dir, fTire, strutAngleRad } = k;
+        ctx.save();
+        ctx.translate(wx, wy);
+        ctx.rotate(strutAngleRad * 0.45);
+
+        const squash = fTire > 0 ? Math.min(7 * scale, (fTire / 4500) * 4.5 * scale) : 0;
+        const tireW = 54 * scale;
+
+        ctx.fillStyle = '#111827';
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2.4 * scale;
+        ctx.beginPath();
+        ctx.roundRect(-tireW * 0.5, -wr + squash * 0.4, tireW, Math.max(10, wr * 2 - squash), 14 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        // Spinning tire tread grooves
+        ctx.strokeStyle = '#1f2937';
+        ctx.lineWidth = 2 * scale;
+        const treadStep = Math.max(8, 14 * scale);
+        const treadOffset = (sim.roadScroll * 130 * scale) % treadStep;
+        for (let ty = -wr + 14 * scale + treadOffset; ty < wr - 14 * scale; ty += treadStep) {
+          ctx.beginPath();
+          ctx.moveTo(-tireW * 0.42, ty);
+          ctx.lineTo(tireW * 0.42, ty);
+          ctx.stroke();
+        }
+
+        // Alloy Rim
+        const rimW = 30 * scale;
+        const rimH = wr * 1.28;
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = '#64748b';
+        ctx.lineWidth = 1.8 * scale;
+        ctx.beginPath();
+        ctx.roundRect(-rimW * 0.5, -rimH * 0.5, rimW, rimH, 6 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        // Brake Rotor & Caliper
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(-dir * 12 * scale - 3 * scale, -wr * 0.52, 6 * scale, wr * 1.04);
+        ctx.fillStyle = '#0284c7';
+        ctx.beginPath();
+        ctx.roundRect(-dir * 13 * scale - 5 * scale, -wr * 0.46, 10 * scale, 18 * scale, 3 * scale);
+        ctx.fill();
+
+        ctx.restore();
+      }
+
+      function drawSteeringKnuckle(ctx, k, scale) {
+        ctx.save();
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.6 * scale;
+        ctx.beginPath();
+        ctx.moveTo(k.wheelCenterX, k.wheelCenterY - 12 * scale);
+        ctx.lineTo(k.pStrutBottom.x, k.pStrutBottom.y);
+        ctx.lineTo(k.pBall.x, k.pBall.y);
+        ctx.lineTo(k.wheelCenterX, k.wheelCenterY + 14 * scale);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawControlArmAndBushing(ctx, k, scale) {
+        const active = sim.selectedPart === 'controlArm' || sim.hoveredPart === 'controlArm';
+
+        ctx.save();
+        if (active) {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 14;
+        }
+
+        const armGrad = ctx.createLinearGradient(k.pLcaIn.x, k.pLcaIn.y, k.pBall.x + 1, k.pBall.y + 1);
+        armGrad.addColorStop(0, active ? '#38bdf8' : '#475569');
+        armGrad.addColorStop(0.5, active ? '#7dd3fc' : '#64748b');
+        armGrad.addColorStop(1, active ? '#38bdf8' : '#475569');
+
+        ctx.strokeStyle = armGrad;
+        ctx.lineWidth = 14 * scale;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(k.pLcaIn.x, k.pLcaIn.y);
+        ctx.lineTo(k.pBall.x, k.pBall.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4 * scale;
+        ctx.beginPath();
+        ctx.moveTo(k.pLcaIn.x + k.sign * 18 * scale, k.pLcaIn.y);
+        ctx.lineTo(k.pBall.x - k.sign * 18 * scale, k.pBall.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // Outer Lower Ball Joint
+        ctx.save();
+        ctx.fillStyle = '#1e293b';
+        ctx.strokeStyle = active ? '#7dd3fc' : '#cbd5e1';
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.arc(k.pBall.x, k.pBall.y, Math.max(4, 8.5 * scale), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.beginPath();
+        ctx.arc(k.pBall.x, k.pBall.y, Math.max(2, 3.5 * scale), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'controlArm',
+          type: 'line',
+          x1: k.pLcaIn.x,
+          y1: k.pLcaIn.y,
+          x2: k.pBall.x,
+          y2: k.pBall.y,
+          r: 16 * scale
+        });
+
+        const stressRatio = Math.min(1, Math.abs(k.bushDefl) * 2.2);
+        drawBushingElement(ctx, k.pLcaIn.x, k.pLcaIn.y, Math.max(6, 15 * scale), stressRatio, scale);
+      }
+
+      function drawBushingElement(ctx, x, y, radius, stressRatio, scale) {
+        const active = sim.selectedPart === 'bushing' || sim.hoveredPart === 'bushing';
+        ctx.save();
+        if (active) {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 14;
+        }
+
+        ctx.fillStyle = '#334155';
+        ctx.strokeStyle = active ? '#7dd3fc' : '#94a3b8';
+        ctx.lineWidth = 1.8 * scale;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        let rubberColor = '#1e293b';
+        if (sim.bushingMode === 'poly') {
+          rubberColor = stressRatio > 0.5 ? '#f59e0b' : '#10b981';
+        } else if (sim.bushingMode === 'worn') {
+          rubberColor = stressRatio > 0.35 ? '#f43f5e' : '#b45309';
+        } else {
+          if (stressRatio > 0.65) rubberColor = '#f43f5e';
+          else if (stressRatio > 0.3) rubberColor = '#f59e0b';
+        }
+
+        ctx.fillStyle = rubberColor;
+        ctx.beginPath();
+        ctx.arc(x, y, radius * 0.76, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (sim.bushingMode === 'worn') {
+          ctx.strokeStyle = '#090d16';
+          ctx.lineWidth = 1.4 * scale;
+          for (let a = 0; a < Math.PI * 2; a += Math.PI / 2.5) {
+            ctx.beginPath();
+            ctx.moveTo(x + Math.cos(a) * radius * 0.42, y + Math.sin(a) * radius * 0.42);
+            ctx.lineTo(x + Math.cos(a + 0.2) * radius * 0.74, y + Math.sin(a + 0.2) * radius * 0.74);
+            ctx.stroke();
+          }
+        }
+
+        const innerOffset = Math.max(-3.5 * scale, Math.min(3.5 * scale, stressRatio * 3.5 * scale));
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.arc(x, y + innerOffset * 0.5, radius * 0.36, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'bushing',
+          type: 'circle',
+          x,
+          y,
+          r: radius + 6 * scale
+        });
+      }
+
+      function drawStrutAndSpring(ctx, k, scale) {
+        const active = sim.selectedPart === 'strut' || sim.hoveredPart === 'strut';
+        const { pStrutBottom, pMount, strutLen, ux, uy, comp, blown } = k;
+        const nx = -uy;
+        const ny = ux;
+
+        const bodyLen = 114 * scale;
+        const bodyTop = {
+          x: pStrutBottom.x + ux * bodyLen,
+          y: pStrutBottom.y + uy * bodyLen
+        };
+
+        k.pSealGland = bodyTop;
+        k.pBodyBottom = pStrutBottom;
+
+        ctx.save();
+        if (active) {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 16;
+        }
+
+        // 1. Back Half of Helical Coil Spring
+        const springBottom = {
+          x: pStrutBottom.x + ux * (42 * scale),
+          y: pStrutBottom.y + uy * (42 * scale)
+        };
+        const springTop = {
+          x: pMount.x - ux * (14 * scale),
+          y: pMount.y - uy * (14 * scale)
+        };
+        const springSpan = Math.max(12 * scale, Math.hypot(springTop.x - springBottom.x, springTop.y - springBottom.y));
+        const coilRadius = 25 * scale;
+        const wireRadius = 4.6 * scale;
+        const turns = 5.5;
+
+        const compRatio = Math.max(0, Math.min(1, (comp + 0.03) / 0.09));
+        const coilBase = active ? '#38bdf8' : (compRatio > 0.8 ? '#f59e0b' : '#0ea5e9');
+        const coilDark = active ? '#0369a1' : (compRatio > 0.8 ? '#b45309' : '#075985');
+
+        for (let i = 0; i < turns; i++) {
+          const t0 = i / turns;
+          const t1 = (i + 0.5) / turns;
+          ctx.strokeStyle = coilDark;
+          ctx.lineWidth = wireRadius * 1.85;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(springBottom.x + ux * (t0 * springSpan) + nx * coilRadius, springBottom.y + uy * (t0 * springSpan) + ny * coilRadius);
+          ctx.lineTo(springBottom.x + ux * (t1 * springSpan) - nx * coilRadius, springBottom.y + uy * (t1 * springSpan) - ny * coilRadius);
+          ctx.stroke();
+        }
+
+        // 2. Chrome Piston Rod
+        const rodGrad = ctx.createLinearGradient(
+          bodyTop.x - nx * 6 * scale, bodyTop.y - ny * 6 * scale,
+          bodyTop.x + nx * 6 * scale + 0.5, bodyTop.y + ny * 6 * scale + 0.5
+        );
+        rodGrad.addColorStop(0, '#64748b');
+        rodGrad.addColorStop(0.45, '#f8fafc');
+        rodGrad.addColorStop(1, '#475569');
+
+        ctx.strokeStyle = rodGrad;
+        ctx.lineWidth = 8 * scale;
+        ctx.lineCap = 'butt';
+        ctx.beginPath();
+        ctx.moveTo(pStrutBottom.x + ux * 20 * scale, pStrutBottom.y + uy * 20 * scale);
+        ctx.lineTo(pMount.x, pMount.y);
+        ctx.stroke();
+
+        // 3. Progressive Bump Stop
+        const bumpSquish = comp > VEH.bumpStart ? Math.min(0.55, (comp - VEH.bumpStart) * 16) : 0;
+        const bumpHeight = Math.max(4, (20 * (1 - bumpSquish)) * scale);
+        const bumpWidth = Math.max(6, (17 * (1 + bumpSquish * 0.45)) * scale);
+        const bumpTopPt = {
+          x: pMount.x - ux * (14 * scale),
+          y: pMount.y - uy * (14 * scale)
+        };
+
+        ctx.save();
+        ctx.translate(bumpTopPt.x, bumpTopPt.y);
+        ctx.rotate(Math.atan2(ux, -uy));
+        ctx.fillStyle = bumpSquish > 0.05 ? '#f43f5e' : '#eab308';
+        ctx.strokeStyle = '#713f12';
+        ctx.lineWidth = 1.2 * scale;
+        ctx.beginPath();
+        ctx.roundRect(-bumpWidth * 0.5, 0, bumpWidth, bumpHeight, 4 * scale);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+
+        // 4. Cutaway Hydraulic Damper Tube, Oil Chamber & Moving Piston
+        const tubeW = 22 * scale;
+        ctx.save();
+        ctx.translate(pStrutBottom.x, pStrutBottom.y);
+        ctx.rotate(Math.atan2(ux, -uy));
+
+        ctx.fillStyle = blown ? '#3f1622' : '#1e293b';
+        ctx.strokeStyle = blown ? '#f43f5e' : (active ? '#7dd3fc' : '#94a3b8');
+        ctx.lineWidth = 2 * scale;
+        ctx.beginPath();
+        ctx.roundRect(-tubeW * 0.5, -bodyLen, tubeW, bodyLen, 4 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        const innerW = tubeW * 0.62;
+        const oilFillRatio = blown ? 0.28 : 0.88;
+        const oilH = Math.max(4, (bodyLen - 14 * scale) * oilFillRatio);
+
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(-innerW * 0.5, -bodyLen + 8 * scale, innerW, Math.max(4, bodyLen - 14 * scale));
+
+        ctx.fillStyle = blown ? 'rgba(244, 63, 94, 0.48)' : 'rgba(56, 189, 248, 0.36)';
+        ctx.fillRect(-innerW * 0.5, -6 * scale - oilH, innerW, oilH);
+
+        // Aerated foam bubbles if blown
+        if (blown) {
+          ctx.fillStyle = 'rgba(254, 205, 211, 0.6)';
+          for (let b = 0; b < 4; b++) {
+            const bx = ((b % 2 === 0 ? -1 : 1) * innerW * 0.2);
+            const by = -8 * scale - ((sim.time * 24 + b * 7) % Math.max(8, oilH));
+            ctx.beginPath();
+            ctx.arc(bx, by, 1.6 * scale, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+
+        // Moving Piston Valve
+        const pistonOffset = Math.max(14 * scale, Math.min(bodyLen - 18 * scale, (strutLen - bodyLen) * 0.85));
+        const pistonY = -bodyLen + pistonOffset;
+        ctx.fillStyle = '#cbd5e1';
+        ctx.fillRect(-innerW * 0.48, pistonY - 3.5 * scale, innerW * 0.96, 7 * scale);
+
+        // Seal Gland Cap & Spring Perch
+        ctx.fillStyle = blown ? '#e11d48' : '#475569';
+        ctx.fillRect(-tubeW * 0.55, -bodyLen - 3 * scale, tubeW * 1.1, 7 * scale);
+        ctx.fillStyle = '#64748b';
+        ctx.fillRect(-coilRadius * 1.15, -42 * scale, coilRadius * 2.3, 6 * scale);
+        ctx.restore();
+
+        // 5. Front Half of Helical Coil Spring
+        for (let i = 0; i < turns; i++) {
+          const t0 = (i + 0.5) / turns;
+          const t1 = Math.min(1, (i + 1.0) / turns);
+          const p0x = springBottom.x + ux * (t0 * springSpan) - nx * coilRadius;
+          const p0y = springBottom.y + uy * (t0 * springSpan) - ny * coilRadius;
+          const p1x = springBottom.x + ux * (t1 * springSpan) + nx * coilRadius;
+          const p1y = springBottom.y + uy * (t1 * springSpan) + ny * coilRadius;
+
+          ctx.strokeStyle = coilBase;
+          ctx.lineWidth = wireRadius * 2.0;
+          ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(p0x, p0y);
+          ctx.lineTo(p1x, p1y);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+          ctx.lineWidth = wireRadius * 0.55;
+          ctx.beginPath();
+          ctx.moveTo(p0x, p0y - 1);
+          ctx.lineTo(p1x, p1y - 1);
+          ctx.stroke();
+        }
+
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'strut',
+          type: 'line',
+          x1: pStrutBottom.x,
+          y1: pStrutBottom.y,
+          x2: pMount.x,
+          y2: pMount.y,
+          r: 28 * scale
+        });
+      }
+
+      function drawStrutMount(ctx, k, scale) {
+        const active = sim.selectedPart === 'mount' || sim.hoveredPart === 'mount';
+        const { pMount, pTower } = k;
+
+        ctx.save();
+        if (active) {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 14;
+        }
+
+        const rubberH = Math.max(5 * scale, (10 - k.mountDefl * 22) * scale);
+        ctx.fillStyle = sim.bushingMode === 'poly' ? '#10b981' : (sim.bushingMode === 'worn' ? '#d97706' : '#1e293b');
+        ctx.strokeStyle = active ? '#7dd3fc' : '#64748b';
+        ctx.lineWidth = 1.6 * scale;
+        ctx.beginPath();
+        ctx.roundRect(pTower.x - 24 * scale, pTower.y - 2 * scale, 48 * scale, rubberH, 4 * scale);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = active ? '#38bdf8' : '#94a3b8';
+        ctx.beginPath();
+        ctx.roundRect(pMount.x - 28 * scale, pMount.y - 3 * scale, 56 * scale, 7 * scale, 3 * scale);
+        ctx.fill();
+
+        ctx.fillStyle = '#cbd5e1';
+        for (const bx of [-16 * scale, 16 * scale]) {
+          ctx.fillRect(pTower.x + bx - 2.5 * scale, pTower.y - 9 * scale, 5 * scale, 7 * scale);
+        }
+
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'mount',
+          type: 'circle',
+          x: pMount.x,
+          y: pMount.y,
+          r: 26 * scale
+        });
+      }
+
+      function drawSwayBarLink(ctx, k, scale) {
+        const active = sim.selectedPart === 'swayBar' || sim.hoveredPart === 'swayBar';
+        const disconnected = sim.swayPct === 0;
+        const { pSwayArmEnd, pSwayTab } = k;
+
+        ctx.save();
+        if (active) {
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 12;
+        }
+
+        ctx.strokeStyle = disconnected ? '#334155' : (active ? '#7dd3fc' : '#cbd5e1');
+        ctx.lineWidth = 4.5 * scale;
+        ctx.lineCap = 'round';
+        if (disconnected) ctx.setLineDash([4 * scale, 4 * scale]);
+
+        ctx.beginPath();
+        ctx.moveTo(pSwayArmEnd.x, pSwayArmEnd.y);
+        ctx.lineTo(pSwayTab.x, pSwayTab.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        for (const pt of [pSwayArmEnd, pSwayTab]) {
+          ctx.fillStyle = '#0f172a';
+          ctx.strokeStyle = active ? '#38bdf8' : '#94a3b8';
+          ctx.lineWidth = 1.6 * scale;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.max(3, 5.2 * scale), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+
+        ctx.restore();
+
+        sim.hitboxes.push({
+          part: 'swayBar',
+          type: 'line',
+          x1: pSwayArmEnd.x,
+          y1: pSwayArmEnd.y,
+          x2: pSwayTab.x,
+          y2: pSwayTab.y,
+          r: 14 * scale
+        });
+      }
+
+      function drawOilLeakEffects(ctx, kin, scale) {
+        for (const p of sim.oilDrops) {
+          const k = kin[p.side];
+          if (!k || !k.pSealGland) continue;
+          const t = Math.min(1, p.progress);
+          const x = k.pSealGland.x + (k.pBodyBottom.x - k.pSealGland.x) * t + k.sign * 8 * scale;
+          const y = k.pSealGland.y + (k.pBodyBottom.y - k.pSealGland.y) * t + Math.max(0, p.progress - 1) * 45 * scale;
+
+          ctx.save();
+          ctx.fillStyle = `rgba(244, 63, 94, ${p.alpha})`;
+          ctx.beginPath();
+          ctx.arc(x, y, Math.max(1.5, p.size * scale), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        for (const sideId of ['left', 'right']) {
+          const k = kin[sideId];
+          if (k && k.blown && k.pSealGland) {
+            const bx = k.pSealGland.x + k.sign * 42 * scale;
+            const by = k.pSealGland.y - 8 * scale;
+            ctx.save();
+            ctx.fillStyle = 'rgba(225, 29, 72, 0.92)';
+            ctx.strokeStyle = '#fda4af';
+            ctx.lineWidth = 1.2;
+            ctx.beginPath();
+            ctx.roundRect(bx - 36 * scale, by - 10 * scale, 72 * scale, 20 * scale, 5 * scale);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `700 ${Math.max(8, Math.round(9.5 * scale))}px monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⚠ BLOWN', bx, by);
+            ctx.restore();
+          }
+        }
+      }
+
+      function drawForceVectors(ctx, k, scale) {
+        if (k.fTire > 200) {
+          const len = Math.min(62 * scale, (k.fTire / 6500) * 42 * scale);
+          const sx = k.wheelCenterX;
+          const sy = k.wheelCenterY + k.wheelRadius + 2 * scale;
+          drawArrow(ctx, sx, sy + len, sx, sy, '#34d399', 2.2 * scale);
+        }
+
+        if (Math.abs(sim.fSway) > 120 && sim.swayPct > 0) {
+          const dirForce = k.id === 'left' ? -Math.sign(sim.fSway) : Math.sign(sim.fSway);
+          const len = Math.min(44 * scale, (Math.abs(sim.fSway) / 2200) * 34 * scale);
+          if (len > 5) {
+            drawArrow(ctx, k.pSwayTab.x, k.pSwayTab.y, k.pSwayTab.x, k.pSwayTab.y - dirForce * len, '#fbbf24', 2.2 * scale);
+          }
+        }
+      }
+
+      function drawArrow(ctx, x1, y1, x2, y2, color, lw) {
+        const head = 6;
+        const ang = Math.atan2(y2 - y1, x2 - x1);
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = lw;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - head * Math.cos(ang - Math.PI / 6), y2 - head * Math.sin(ang - Math.PI / 6));
+        ctx.lineTo(x2 - head * Math.cos(ang + Math.PI / 6), y2 - head * Math.sin(ang + Math.PI / 6));
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawCalloutLabels(ctx, w, scale, kin) {
+        const kL = kin.left;
+        const kR = kin.right;
+
+        const callouts = [
+          {
+            part: 'mount',
+            title: 'STRUT MOUNT',
+            sub: 'Upper Bearing Isolator',
+            target: kL.pMount,
+            labelPos: { x: Math.max(76 * scale, kL.pMount.x - 105 * scale), y: kL.pMount.y - 34 * scale },
+            align: 'right'
+          },
+          {
+            part: 'strut',
+            title: 'MACPHERSON STRUT',
+            sub: 'Coil Spring + Hydraulic Damper',
+            target: {
+              x: (kR.pMount.x + kR.pStrutBottom.x) * 0.5 + 16 * scale,
+              y: (kR.pMount.y + kR.pStrutBottom.y) * 0.5 - 10 * scale
+            },
+            labelPos: { x: Math.min(w - 86 * scale, kR.pMount.x + 115 * scale), y: kR.pMount.y - 22 * scale },
+            align: 'left'
+          },
+          {
+            part: 'swayBar',
+            title: 'SWAY BAR & LINK',
+            sub: sim.swayPct === 0 ? 'Disconnected' : 'Anti-Roll Torsion Coupling',
+            target: kR.pSwayTab,
+            labelPos: { x: Math.min(w - 86 * scale, kR.pSwayTab.x + 128 * scale), y: kR.pSwayTab.y + 8 * scale },
+            align: 'left'
+          },
+          {
+            part: 'controlArm',
+            title: 'CONTROL ARM',
+            sub: 'Pivoting LCA + Ball Joint',
+            target: {
+              x: (kL.pLcaIn.x + kL.pBall.x) * 0.5,
+              y: (kL.pLcaIn.y + kL.pBall.y) * 0.5
+            },
+            labelPos: { x: Math.max(82 * scale, kL.pBall.x - 95 * scale), y: kL.pBall.y + 52 * scale },
+            align: 'right'
+          },
+          {
+            part: 'bushing',
+            title: 'ELASTOMER BUSHING',
+            sub: sim.bushingMode === 'poly' ? 'Stiff Polyurethane' : (sim.bushingMode === 'worn' ? 'Worn / Loose' : 'OEM Rubber Pivot'),
+            target: kR.pLcaIn,
+            labelPos: { x: kR.pLcaIn.x + 28 * scale, y: kR.pLcaIn.y + 54 * scale },
+            align: 'left'
+          }
+        ];
+
+        ctx.save();
+        const fontSize = Math.max(9, Math.round(10 * scale));
+        const subFontSize = Math.max(8, Math.round(8.5 * scale));
+
+        for (const c of callouts) {
+          const active = sim.selectedPart === c.part || sim.hoveredPart === c.part;
+          const lineColor = active ? '#38bdf8' : 'rgba(148, 163, 184, 0.55)';
+
+          ctx.fillStyle = active ? '#38bdf8' : '#cbd5e1';
+          ctx.beginPath();
+          ctx.arc(c.target.x, c.target.y, Math.max(2, active ? 4 * scale : 2.8 * scale), 0, Math.PI * 2);
+          ctx.fill();
+
+          const elbowX = c.labelPos.x + (c.align === 'right' ? 10 * scale : -10 * scale);
+          ctx.strokeStyle = lineColor;
+          ctx.lineWidth = active ? 1.8 : 1.2;
+          ctx.beginPath();
+          ctx.moveTo(c.target.x, c.target.y);
+          ctx.lineTo(elbowX, c.labelPos.y);
+          ctx.lineTo(c.labelPos.x, c.labelPos.y);
+          ctx.stroke();
+
+          ctx.font = `700 ${fontSize}px monospace`;
+          const textW = ctx.measureText(c.title).width;
+          const boxW = textW + 14 * scale;
+          const boxH = 26 * scale;
+          const boxX = c.align === 'right' ? c.labelPos.x - boxW : c.labelPos.x;
+          const boxY = c.labelPos.y - boxH * 0.5;
+
+          ctx.fillStyle = active ? 'rgba(14, 116, 144, 0.9)' : 'rgba(15, 23, 42, 0.86)';
+          ctx.strokeStyle = active ? '#38bdf8' : 'rgba(71, 85, 105, 0.72)';
+          ctx.lineWidth = active ? 1.5 : 1;
+          ctx.beginPath();
+          ctx.roundRect(boxX, boxY, boxW, boxH, 5 * scale);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = active ? '#ffffff' : '#e2e8f0';
+          ctx.textAlign = 'left';
+          ctx.textBaseline = 'top';
+          ctx.fillText(c.title, boxX + 7 * scale, boxY + 4 * scale);
+
+          ctx.fillStyle = active ? '#bae6fd' : '#94a3b8';
+          ctx.font = `400 ${subFontSize}px sans-serif`;
+          ctx.fillText(c.sub, boxX + 7 * scale, boxY + 14 * scale);
+
+          sim.hitboxes.push({
+            part: c.part,
+            type: 'rect',
+            x: boxX,
+            y: boxY,
+            w: boxW,
+            h: boxH
+          });
+        }
+        ctx.restore();
+      }
+
+      // =========================================================================
+      // 6. 4-CHANNEL TELEMETRY OSCILLOSCOPE & HUD UPDATER
+      // =========================================================================
+      function renderScope() {
+        const cScope = byId('telemetryCanvas');
+        if (!cScope) return;
+        const ctx = cScope.getContext('2d');
+        if (!ctx) return;
+
+        const rect = cScope.getBoundingClientRect();
+        const w = Math.max(260, rect.width || 420);
+        const h = Math.max(120, rect.height || 165);
+
+        ctx.clearRect(0, 0, w, h);
+
+        const midY = h * 0.5;
+        ctx.strokeStyle = 'rgba(51, 65, 85, 0.45)';
+        ctx.lineWidth = 1;
+        for (const frac of [0.2, 0.5, 0.8]) {
+          ctx.beginPath();
+          ctx.moveTo(0, h * frac);
+          ctx.lineTo(w, h * frac);
+          ctx.stroke();
+        }
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '10px monospace';
+        ctx.fillText('+60mm', 6, h * 0.2 - 3);
+        ctx.fillText('0', 6, midY - 3);
+        ctx.fillText('-60mm', 6, h * 0.8 - 3);
+
+        const len = sim.scope.heaveMm.length;
+        const dx = w / Math.max(1, len - 1);
+        const pxPerMm = (h * 0.32) / 60;
+
+        function drawTrace(arr, color, mult, lw, dashed) {
+          ctx.save();
+          ctx.strokeStyle = color;
+          ctx.lineWidth = lw;
+          if (dashed) ctx.setLineDash([4, 3]);
+          ctx.beginPath();
+          for (let i = 0; i < len; i++) {
+            const x = i * dx;
+            const y = midY - arr[i] * mult;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        // Channel 4: Damper Force (kN)
+        drawTrace(sim.scope.damperKn, 'rgba(244, 63, 94, 0.82)', pxPerMm * 20, 1.5, false);
+        // Channel 3: Body Roll Angle (deg)
+        drawTrace(sim.scope.rollDeg, 'rgba(251, 191, 36, 0.88)', pxPerMm * 8.5, 1.6, false);
+        // Channel 2: L & R Wheel Travel (mm)
+        drawTrace(sim.scope.wheelRMm, 'rgba(45, 212, 191, 0.85)', pxPerMm, 1.6, true);
+        drawTrace(sim.scope.wheelLMm, '#34d399', pxPerMm, 1.9, false);
+        // Channel 1: Chassis Heave (mm)
+        drawTrace(sim.scope.heaveMm, '#38bdf8', pxPerMm, 2.1, false);
+      }
+
+      function updateTelemetryUI() {
+        const heaveMm = sim.zChassis * 1000;
+        const rollDeg = (sim.roll * 180) / Math.PI;
+
+        setText('hudHeave', `${heaveMm >= 0 ? '+' : ''}${heaveMm.toFixed(1)} mm`);
+        setText('hudRoll', `${rollDeg >= 0 ? '+' : ''}${rollDeg.toFixed(1)}°`);
+        setText('hudLatG', `${sim.latG >= 0 ? '+' : ''}${sim.latG.toFixed(2)} G`);
+        setText('hudLongG', `${sim.longG >= 0 ? '+' : ''}${sim.longG.toFixed(2)} G`);
+        setText('hudSwayTorque', `${Math.round(Math.abs(sim.fSway * 0.38))} Nm`);
+
+        const elL = byId('hudLeftStrut');
+        if (elL) {
+          if (isBlownLeft()) {
+            elL.textContent = 'BLOWN (3%)';
+            elL.className = 'status-pill status-blown';
+          } else {
+            elL.textContent = `OK (${sim.dampingPct}%)`;
+            elL.className = 'status-pill status-ok';
+          }
+        }
+
+        const elR = byId('hudRightStrut');
+        if (elR) {
+          if (isBlownRight()) {
+            elR.textContent = 'BLOWN (3%)';
+            elR.className = 'status-pill status-blown';
+          } else {
+            elR.textContent = `OK (${sim.dampingPct}%)`;
+            elR.className = 'status-pill status-ok';
+          }
+        }
+
+        const warn = byId('telemBumpWarn');
+        if (warn) {
+          warn.style.display = (Math.abs(sim.fStopL) > 120 || Math.abs(sim.fStopR) > 120) ? 'inline' : 'none';
+        }
+
+        const note = byId('telemNote');
+        if (note) {
+          if (isBlownLeft() || isBlownRight()) {
+            note.textContent = '⚠ Blown Shock (3% Damping): Severe resonant bounce & bump-stop bottoming!';
+            note.style.color = '#fb7185';
+          } else {
+            const zeta = (sim.dampingPct / 100) * 0.65;
+            const tag = zeta < 0.2 ? 'Underdamped / Bouncy' : (zeta > 0.5 ? 'Firm / Track Valving' : 'Controlled OEM decay');
+            note.textContent = `Effective Damping Ratio: ζ ≈ ${zeta.toFixed(2)} (${tag})`;
+            note.style.color = '#94a3b8';
+          }
+        }
+
+        // Update Component Inspector Live Metrics
+        const p = sim.selectedPart;
+        const bushStrain = Math.min(100, Math.round(Math.max(Math.abs(sim.bushDeflL), Math.abs(sim.bushDeflR)) * 165));
+
+        if (p === 'strut') {
+          setText('inspM1Val', `${(sim.compL * 1000).toFixed(1)} / ${(sim.compR * 1000).toFixed(1)} mm`);
+          setText('inspM2Val', `${Math.round(sim.fDamperL)} / ${Math.round(sim.fDamperR)} N`);
+          setText('inspM3Val', `${sim.vCompL.toFixed(2)} / ${sim.vCompR.toFixed(2)} m/s`);
+          setText('inspM4Val', `${Math.round(sim.fStopL)} / ${Math.round(sim.fStopR)} N`);
+        } else if (p === 'mount') {
+          setText('inspM1Val', `${(sim.mountDeflL * 6.5).toFixed(2)} / ${(sim.mountDeflR * 6.5).toFixed(2)} mm`);
+          setText('inspM2Val', `${Math.round(sim.fSpringL + sim.fDamperL)} / ${Math.round(sim.fSpringR + sim.fDamperR)} N`);
+          setText('inspM3Val', sim.bushingMode === 'poly' ? '85A POLY' : (sim.bushingMode === 'worn' ? 'DEGRADED' : '60A RUBBER'));
+          setText('inspM4Val', `${Math.min(100, Math.round(Math.max(Math.abs(sim.mountDeflL), Math.abs(sim.mountDeflR)) * 190))}%`);
+        } else if (p === 'controlArm') {
+          setText('inspM1Val', `${sim.lcaAngleL.toFixed(1)}° / ${sim.lcaAngleR.toFixed(1)}°`);
+          setText('inspM2Val', `${sim.camberL.toFixed(2)}° / ${sim.camberR.toFixed(2)}°`);
+          setText('inspM3Val', `${Math.round(Math.max(sim.fTireTotalL, sim.fTireTotalR) * 0.42)} N`);
+          setText('inspM4Val', 'CIRCULAR ARC');
+        } else if (p === 'swayBar') {
+          setText('inspM1Val', `${Math.round(Math.abs(sim.fSway * 0.38))} Nm`);
+          setText('inspM2Val', `${Math.round(Math.abs(sim.fSway))} N`);
+          setText('inspM3Val', `${(((sim.compR - sim.compL) * 180) / Math.PI * 3.2).toFixed(1)}°`);
+          setText('inspM4Val', sim.swayPct === 0 ? 'DISCONNECTED' : `${sim.swayPct}% STIFFNESS`);
+        } else if (p === 'bushing') {
+          setText('inspM1Val', `${(sim.bushDeflL * 5.2).toFixed(2)} / ${(sim.bushDeflR * 5.2).toFixed(2)} mm`);
+          setText('inspM2Val', `${Math.round(Math.abs(sim.fSpringL) * 0.65)} / ${Math.round(Math.abs(sim.fSpringR) * 0.65)} N`);
+          setText('inspM3Val', sim.bushingMode === 'poly' ? 'HIGH (2.4×)' : (sim.bushingMode === 'worn' ? 'LOW (0.45×)' : 'NOMINAL (1.0×)'));
+          setText('inspM4Val', `${bushStrain}%`);
+        }
+      }
+
+      // =========================================================================
+      // 7. INTERACTIVE CANVAS HOVER TOOLTIPS & CLICK SELECTION
+      // =========================================================================
+      function pointToSegmentDist(px, py, x1, y1, x2, y2) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const l2 = dx * dx + dy * dy;
+        if (l2 === 0) return Math.hypot(px - x1, py - y1);
+        let t = ((px - x1) * dx + (py - y1) * dy) / l2;
+        t = Math.max(0, Math.min(1, t));
+        return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+      }
+
+      function hitTestCanvas(clientX, clientY) {
+        const cMain = byId('suspensionCanvas');
+        if (!cMain) return null;
+        const rect = cMain.getBoundingClientRect();
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+        sim.pointerX = x;
+        sim.pointerY = y;
+
+        for (let i = sim.hitboxes.length - 1; i >= 0; i--) {
+          const hb = sim.hitboxes[i];
+          if (hb.type === 'circle' && Math.hypot(x - hb.x, y - hb.y) <= hb.r) return hb.part;
+          if (hb.type === 'rect' && x >= hb.x && x <= hb.x + hb.w && y >= hb.y && y <= hb.y + hb.h) return hb.part;
+          if (hb.type === 'line' && pointToSegmentDist(x, y, hb.x1, hb.y1, hb.x2, hb.y2) <= hb.r) return hb.part;
+        }
+        return null;
+      }
+
+      function updateHoverTooltip() {
+        const tip = byId('canvasTooltip');
+        const cMain = byId('suspensionCanvas');
+        if (!tip || !cMain) return;
+
+        if (!sim.hoveredPart || !COMPONENT_INFO[sim.hoveredPart]) {
+          tip.style.display = 'none';
+          cMain.style.cursor = 'crosshair';
+          return;
+        }
+
+        cMain.style.cursor = 'pointer';
+        const info = COMPONENT_INFO[sim.hoveredPart];
+        tip.innerHTML = `<strong>${info.title}</strong>Click to lock in Component Inspector`;
+        tip.style.display = 'block';
+
+        const maxX = Math.max(10, cMain.clientWidth - 230);
+        const maxY = Math.max(10, cMain.clientHeight - 60);
+        tip.style.left = `${Math.min(maxX, Math.max(10, sim.pointerX + 14))}px`;
+        tip.style.top = `${Math.min(maxY, Math.max(10, sim.pointerY - 12))}px`;
+      }
+
+      // =========================================================================
+      // 8. UI CONTROL HANDLERS (EXPOSED GLOBALLY FOR INLINE BUTTONS)
+      // =========================================================================
+      function selectPart(partKey) {
+        if (!COMPONENT_INFO[partKey]) return;
+        sim.selectedPart = partKey;
+        const info = COMPONENT_INFO[partKey];
+
+        setText('inspTitle', info.title);
+        setText('inspDesc', info.desc);
+        setText('inspM1Label', info.m1);
+        setText('inspM2Label', info.m2);
+        setText('inspM3Label', info.m3);
+        setText('inspM4Label', info.m4);
+
+        ['strut', 'mount', 'controlArm', 'swayBar', 'bushing'].forEach((k) => {
+          const btn = byId(`pill-${k}`);
+          if (btn) btn.className = (k === partKey) ? 'active-cyan' : '';
+        });
+      }
+
+      function setBlownMode(mode) {
+        sim.blownMode = mode;
+        ['none', 'left', 'right', 'both'].forEach((m) => {
+          const btn = byId(`blown-${m}`);
+          if (!btn) return;
+          if (m === mode) {
+            btn.className = (m === 'none') ? 'active-emerald' : 'active-rose';
+          } else {
+            btn.className = '';
+          }
+        });
+      }
+
+      function setBushingMode(mode) {
+        sim.bushingMode = mode;
+        ['oem', 'poly', 'worn'].forEach((m) => {
+          const btn = byId(`bush-${m}`);
+          if (!btn) return;
+          if (m === mode) {
+            btn.className = m === 'poly' ? 'active-emerald' : (m === 'worn' ? 'active-amber' : 'active-cyan');
+          } else {
+            btn.className = '';
+          }
+        });
+
+        const hudB = byId('hudBushing');
+        if (hudB) {
+          hudB.textContent = mode === 'poly' ? 'POLYURETHANE' : (mode === 'worn' ? 'WORN / LOOSE' : 'OEM RUBBER');
+          hudB.style.color = mode === 'poly' ? '#6ee7b7' : (mode === 'worn' ? '#fbbf24' : '#f1f5f9');
+        }
+      }
+
+      function setRoadMode(mode) {
+        sim.roadMode = mode;
+        ['smooth', 'speedbump', 'pothole', 'washboard', 'curbdrop'].forEach((m) => {
+          const btn = byId(`road-${m}`);
+          if (!btn) return;
+          const spanClass = (m === 'curbdrop') ? 'col-span-2 ' : '';
+          btn.className = spanClass + (m === mode ? 'active-cyan' : '');
+        });
+      }
+
+      function triggerImpulse(type) {
+        if (type === 'leftBump') {
+          sim.impulses.push({ side: 'left', dist: 1.75, width: 0.72, height: 0.056 });
+        } else if (type === 'rightBump') {
+          sim.impulses.push({ side: 'right', dist: 1.75, width: 0.72, height: 0.056 });
+        } else if (type === 'bothBumps') {
+          sim.impulses.push({ side: 'both', dist: 1.75, width: 0.75, height: 0.056 });
+        } else if (type === 'leftPothole') {
+          sim.impulses.push({ side: 'left', dist: 1.75, width: 0.85, height: -0.058 });
+        } else if (type === 'bounceTest') {
+          // Lift chassis +60mm and release downward to inspect oscillation decay
+          sim.zChassis = 0.06;
+          sim.vzChassis = -0.38;
+        }
+      }
+
+      function setSteerMode(mode) {
+        sim.steerMode = mode;
+        ['straight', 'left', 'right', 'slalom'].forEach((m) => {
+          const btn = byId(`steer-${m}`);
+          if (!btn) return;
+          if (m === mode) {
+            btn.className = (m === 'slalom') ? 'active-emerald' : 'active-cyan';
+          } else {
+            btn.className = '';
+          }
+        });
+
+        const sl = byId('sliderSteer');
+        if (mode === 'straight') {
+          sim.steerInput = 0;
+          if (sl) sl.value = '0';
+        } else if (mode === 'left') {
+          sim.steerInput = -0.82;
+          if (sl) sl.value = '-82';
+        } else if (mode === 'right') {
+          sim.steerInput = 0.82;
+          if (sl) sl.value = '82';
+        }
+        updateSteerBadge();
+      }
+
+      function updateSteerBadge() {
+        if (sim.steerMode === 'slalom') {
+          setText('valSteer', 'AUTO SLALOM');
+        } else if (sim.steerInput < -0.06) {
+          setText('valSteer', `LEFT ${Math.abs(Math.round(sim.steerInput * 100))}%`);
+        } else if (sim.steerInput > 0.06) {
+          setText('valSteer', `RIGHT ${Math.round(sim.steerInput * 100)}%`);
+        } else {
+          setText('valSteer', 'STRAIGHT');
+        }
+      }
+
+      function setLongMode(mode) {
+        sim.longMode = mode;
+        ['cruise', 'brake', 'accel'].forEach((m) => {
+          const btn = byId(`long-${m}`);
+          if (!btn) return;
+          if (m === mode) {
+            btn.className = m === 'brake' ? 'active-rose' : (m === 'accel' ? 'active-emerald' : 'active-cyan');
+          } else {
+            btn.className = '';
+          }
+        });
+      }
+
+      function togglePause() {
+        sim.paused = !sim.paused;
+        setText('btnPause', sim.paused ? '▶ RESUME' : '⏸ PAUSE');
+      }
+
+      function toggleSlowMo() {
+        sim.slowMo = !sim.slowMo;
+        const btn = byId('btnSlowMo');
+        if (btn) btn.className = sim.slowMo ? 'btn-mono active-amber' : 'btn-mono';
+      }
+
+      function resetSimulation() {
+        sim.zChassis = 0;
+        sim.vzChassis = 0;
+        sim.roll = 0;
+        sim.vRoll = 0;
+        sim.zWheelL = 0;
+        sim.vzWheelL = 0;
+        sim.zWheelR = 0;
+        sim.vzWheelR = 0;
+        sim.prevRoadHL = 0;
+        sim.prevRoadHR = 0;
+        sim.impulses = [];
+        sim.oilDrops = [];
+        sim.scope.heaveMm.fill(0);
+        sim.scope.wheelLMm.fill(0);
+        sim.scope.wheelRMm.fill(0);
+        sim.scope.rollDeg.fill(0);
+        sim.scope.damperKn.fill(0);
+        setLongMode('cruise');
+        renderDiagram();
+        renderScope();
+        updateTelemetryUI();
+      }
+
+      function applyScenario(name) {
+        ['oem', 'blownLeft', 'track', 'noSway', 'wornBushings'].forEach((s) => {
+          const btn = byId(`scen-${s}`);
+          if (btn) btn.className = (s === name) ? 'active-cyan' : '';
+        });
+
+        if (name === 'oem') {
+          sim.dampingPct = 65;
+          sim.springPct = 100;
+          sim.swayPct = 100;
+          setBlownMode('none');
+          setBushingMode('oem');
+          setRoadMode('smooth');
+          setSteerMode('straight');
+          setLongMode('cruise');
+        } else if (name === 'blownLeft') {
+          sim.dampingPct = 65;
+          sim.springPct = 100;
+          sim.swayPct = 100;
+          setBlownMode('left');
+          setBushingMode('oem');
+          setRoadMode('speedbump');
+          selectPart('strut');
+        } else if (name === 'track') {
+          sim.dampingPct = 90;
+          sim.springPct = 145;
+          sim.swayPct = 145;
+          setBlownMode('none');
+          setBushingMode('poly');
+          setSteerMode('slalom');
+        } else if (name === 'noSway') {
+          sim.dampingPct = 55;
+          sim.springPct = 85;
+          sim.swayPct = 0;
+          setBlownMode('none');
+          setBushingMode('oem');
+          setSteerMode('slalom');
+          selectPart('swayBar');
+        } else if (name === 'wornBushings') {
+          sim.dampingPct = 50;
+          sim.springPct = 95;
+          sim.swayPct = 90;
+          setBlownMode('none');
+          setBushingMode('worn');
+          setRoadMode('washboard');
+          selectPart('bushing');
+        }
+
+        const slDamp = byId('sliderDamping');
+        if (slDamp) { slDamp.value = String(sim.dampingPct); syncDampingUI(); }
+        const slSpr = byId('sliderSpring');
+        if (slSpr) { slSpr.value = String(sim.springPct); syncSpringUI(); }
+        const slSw = byId('sliderSway');
+        if (slSw) { slSw.value = String(sim.swayPct); syncSwayUI(); }
+      }
+
+      function syncDampingUI() {
+        setText('valDamping', `${sim.dampingPct}%`);
+        const desc = sim.dampingPct === 0 ? 'Zero Damping'
+          : sim.dampingPct < 35 ? 'Soft / Worn'
+          : sim.dampingPct <= 75 ? 'Sport / OEM'
+          : 'Race Valving';
+        setText('descDamping', desc);
+      }
+
+      function syncSpringUI() {
+        const nmm = Math.round(45 * (sim.springPct / 100));
+        setText('valSpring', `${sim.springPct}% (${nmm} N/mm)`);
+      }
+
+      function syncSwayUI() {
+        const lbl = sim.swayPct === 0 ? '0% (Disconnected)'
+          : sim.swayPct < 80 ? `${sim.swayPct}% (Soft)`
+          : sim.swayPct <= 115 ? `${sim.swayPct}% (OEM)`
+          : `${sim.swayPct}% (Track)`;
+        setText('valSway', lbl);
+      }
+
+      // Expose button handlers globally
+      window.applyScenario = applyScenario;
+      window.togglePause = togglePause;
+      window.toggleSlowMo = toggleSlowMo;
+      window.resetSimulation = resetSimulation;
+      window.selectPart = selectPart;
+      window.setBlownMode = setBlownMode;
+      window.setBushingMode = setBushingMode;
+      window.setRoadMode = setRoadMode;
+      window.triggerImpulse = triggerImpulse;
+      window.setSteerMode = setSteerMode;
+      window.setLongMode = setLongMode;
+
+      // =========================================================================
+      // 9. SAFE STARTUP & ANIMATION LOOP
+      // =========================================================================
+      function bindUIListeners() {
+        const slDamp = byId('sliderDamping');
+        if (slDamp) {
+          slDamp.addEventListener('input', (e) => {
+            sim.dampingPct = parseInt(e.target.value, 10) || 0;
+            syncDampingUI();
+          });
+        }
+
+        const slSpr = byId('sliderSpring');
+        if (slSpr) {
+          slSpr.addEventListener('input', (e) => {
+            sim.springPct = parseInt(e.target.value, 10) || 100;
+            syncSpringUI();
+          });
+        }
+
+        const slSw = byId('sliderSway');
+        if (slSw) {
+          slSw.addEventListener('input', (e) => {
+            sim.swayPct = parseInt(e.target.value, 10) || 0;
+            syncSwayUI();
+          });
+        }
+
+        const slSpd = byId('sliderSpeed');
+        if (slSpd) {
+          slSpd.addEventListener('input', (e) => {
+            sim.speedMph = parseInt(e.target.value, 10) || 0;
+            setText('valSpeed', `${sim.speedMph} mph`);
+          });
+        }
+
+        const slStr = byId('sliderSteer');
+        if (slStr) {
+          slStr.addEventListener('input', (e) => {
+            sim.steerMode = 'manual';
+            ['straight', 'left', 'right', 'slalom'].forEach((m) => {
+              const b = byId(`steer-${m}`);
+              if (b) b.className = '';
+            });
+            sim.steerInput = (parseInt(e.target.value, 10) || 0) / 100;
+            updateSteerBadge();
+          });
+        }
+
+        const cMain = byId('suspensionCanvas');
+        if (cMain) {
+          cMain.addEventListener('mousemove', (e) => {
+            sim.hoveredPart = hitTestCanvas(e.clientX, e.clientY);
+            updateHoverTooltip();
+          });
+
+          cMain.addEventListener('mouseleave', () => {
+            sim.hoveredPart = null;
+            updateHoverTooltip();
+          });
+
+          cMain.addEventListener('click', (e) => {
+            const hit = hitTestCanvas(e.clientX, e.clientY);
+            if (hit) selectPart(hit);
+          });
+
+          cMain.addEventListener('touchstart', (e) => {
+            if (e.touches && e.touches.length > 0) {
+              const hit = hitTestCanvas(e.touches[0].clientX, e.touches[0].clientY);
+              if (hit) selectPart(hit);
+            }
+          }, { passive: true });
+        }
+
+        window.addEventListener('resize', () => {
+          try {
+            resizeCanvases();
+            renderDiagram();
+            renderScope();
+          } catch (err) {
+            console.error('Resize render warning:', err);
+          }
+        });
+      }
+
+      let lastTime = null;
+      function mainLoop(timestamp) {
+        try {
+          if (lastTime === null) lastTime = timestamp;
+          const dt = (timestamp - lastTime) / 1000;
+          lastTime = timestamp;
+
+          stepPhysics(dt);
+          renderDiagram();
+          renderScope();
+          updateTelemetryUI();
+        } catch (err) {
+          console.error('Simulation frame error:', err);
+        }
+        requestAnimationFrame(mainLoop);
+      }
+
+      function initApp() {
+        try {
+          bindUIListeners();
+          resizeCanvases();
+          selectPart('strut');
+          setBlownMode('none');
+          setBushingMode('oem');
+          setRoadMode('smooth');
+          setSteerMode('straight');
+          setLongMode('cruise');
+          syncDampingUI();
+          syncSpringUI();
+          syncSwayUI();
+
+          // Render initial frame synchronously so the car diagram appears immediately
+          renderDiagram();
+          renderScope();
+          updateTelemetryUI();
+        } catch (err) {
+          console.error('Initialization error:', err);
+        }
+        requestAnimationFrame(mainLoop);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
