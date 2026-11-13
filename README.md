@@ -2,6 +2,7 @@
 
 A single-file, zero-dependency interactive automotive engineering cutaway diagram and real-time half-car physics simulator (`macpherson_strut_suspension_diagram_physics_simulator.html`). Designed for students, mechanics, and vehicle dynamics enthusiasts, it visualizes how front MacPherson strut suspension components articulate, deform, and transfer loads across bumps, potholes, cornering maneuvers, and component failures.
 
+![Description of the screenshot](screenshot01.png)
 ---
 
 ## Key Features
